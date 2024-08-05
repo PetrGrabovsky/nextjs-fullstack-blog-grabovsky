@@ -1,0 +1,26 @@
+# Ignorování složky node_modules, která obsahuje nainstalované závislosti
+node_modules
+
+# Ignorování složky build, která obsahuje produkční build výstup
+build
+
+# Ignorování složky .next, která obsahuje build výstup Next.js aplikace
+.next
+
+# Ignorování složky out, která obsahuje exportovaný statický obsah aplikace
+out
+
+# Ignorování složky coverage, která obsahuje reporty z testovacího pokrytí kódu
+coverage
+
+# Ignorování env souborů
+*.env
+
+# Ignorování log souborů
+*.log
+
+# Ignorování souborů s konfigurací
+*.config.js
+
+# Ignorování specifických dočasných souborů
+.temp
