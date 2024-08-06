@@ -7,3 +7,10 @@ export type GlobalContextType = {
   // Funkce pro nastavení stavu načítání
   setLoading: Dispatch<SetStateAction<boolean>>;
 };
+
+// Rozhraní pro položky menu
+export interface MenuItem {
+  id: string; // Unikátní identifikátor
+  label: string; // Textový popis
+  path: string; // Cesta (URL) pro danou položku menu
+}
