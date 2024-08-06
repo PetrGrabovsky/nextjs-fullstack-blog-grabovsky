@@ -8,11 +8,18 @@ import Link from 'next/link';
 const Header: FC = () => {
   // Stav pro správu sticky stavu
   const [sticky, setSticky] = useState<boolean>(false);
+  // Stav pro správu otevření a zavření mobilního menu
+  const [navbarOpen, setNavbarOpen] = useState<boolean>(false);
 
   // Funkce pro nastavení sticky navbaru na základě pozice scrollování
   const handleStickyNavbar = () => {
     if (window.scrollY >= 80) setSticky(true);
     else setSticky(false);
+  };
+
+  // Funkce pro přepínání stavu mobilního menu
+  const handleNavbarToggle = () => {
+    setNavbarOpen(!navbarOpen);
   };
 
   useEffect(() => {
@@ -29,6 +36,11 @@ const Header: FC = () => {
   const stickyHeaderClasses = clsx(
     'shadow-sticky dark:!bg-primary !fixed !z-[9999] !bg-white !bg-opacity-80 backdrop-blur-sm',
     '!transition dark:!bg-opacity-20'
+  );
+
+  // Společné třídy pro všechny span elementy hamburger ikony
+  const hamburgerLineClasses = clsx(
+    'relative my-1.5 block h-0.5 w-[30px] bg-black transition-all duration-300 dark:bg-white'
   );
 
   return (
@@ -52,6 +64,42 @@ const Header: FC = () => {
               >
                 NextBlog
               </Link>
+            </div>
+            <div className="flex w-full items-center justify-between px-4">
+              <div>
+                {/* Tlačítko pro přepínání stavu mobilního menu */}
+                <button
+                  onClick={handleNavbarToggle}
+                  id="navbarToggler"
+                  aria-label="Mobile Menu"
+                  className={clsx(
+                    'absolute right-4 top-1/2 block translate-y-[-50%] rounded-lg px-3 py-[6px]',
+                    'ring-primary focus:ring-2 lg:hidden'
+                  )}
+                >
+                  {/* Elementy span tvořící ikonu hamburger */}
+                  <span
+                    className={clsx(navbarOpen && 'top-[7px] rotate-45', hamburgerLineClasses)}
+                  />
+                  <span className={clsx(navbarOpen && 'opacity-0', hamburgerLineClasses)} />
+                  <span
+                    className={clsx(navbarOpen && 'top-[-8px] -rotate-45', hamburgerLineClasses)}
+                  />
+                </button>
+                {/* Navigační menu */}
+                <nav
+                  id="navbarCollapse"
+                  className={clsx(
+                    navbarOpen ? 'visible top-full opacity-100' : 'invisible top-[120%] opacity-0',
+                    'absolute right-0 z-30 w-[250px] rounded border-[0.5px] bg-white',
+                    'border-body-color/50 px-6 py-4 duration-300 dark:border-body-color/20',
+                    'dark:bg-dark lg:visible lg:static lg:w-auto lg:border-none',
+                    'lg:!bg-transparent lg:p-0 lg:opacity-100'
+                  )}
+                >
+                  <ul className="block lg:flex lg:space-x-12"></ul>
+                </nav>
+              </div>
             </div>
           </div>
         </div>
