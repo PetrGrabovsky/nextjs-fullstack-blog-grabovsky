@@ -3,6 +3,8 @@
 import { FC, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import Link from 'next/link';
+import { menuItems } from '@/utils/data-mappings';
+import { MenuItem } from '@/utils/types';
 
 // Funkční komponenta Header
 const Header: FC = () => {
@@ -97,7 +99,22 @@ const Header: FC = () => {
                     'lg:!bg-transparent lg:p-0 lg:opacity-100'
                   )}
                 >
-                  <ul className="block lg:flex lg:space-x-12"></ul>
+                  <ul className="block lg:flex lg:space-x-12">
+                    {/* Dynamické generování položek menu */}
+                    {menuItems.map((menuItem: MenuItem) => (
+                      <li key={menuItem.id} className="group relative">
+                        <Link
+                          href={menuItem.path}
+                          className={clsx(
+                            'flex py-2 text-base text-dark group-hover:opacity-70',
+                            'dark:text-white lg:mr-0 lg:inline-flex lg:px-0 lg:py-6'
+                          )}
+                        >
+                          {menuItem.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 </nav>
               </div>
             </div>
