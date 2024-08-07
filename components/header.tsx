@@ -5,6 +5,8 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import { menuItems } from '@/utils/data-mappings';
 import { MenuItem } from '@/utils/types';
+import Button from './button';
+import ThemeToggler from './theme-toggler';
 
 // Funkční komponenta Header
 const Header: FC = () => {
@@ -116,6 +118,16 @@ const Header: FC = () => {
                     ))}
                   </ul>
                 </nav>
+              </div>
+              <div className="flex items-center justify-end gap-4 pr-16 lg:pr-0">
+                {/* Tlačítko pro vytvoření nového blogu */}
+                <Button onClick={() => {}} text="Create" />
+                {/* Tlačítko pro přihlášení */}
+                <Button onClick={() => {}} text="Login" />
+                <div className="flex items-center gap-3">
+                  {/* Komponenta pro přepínání mezi světlým a tmavým tématem */}
+                  <ThemeToggler />
+                </div>
               </div>
             </div>
           </div>
