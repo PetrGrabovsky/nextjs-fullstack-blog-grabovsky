@@ -12,6 +12,7 @@ const Spinner: FC = () => {
       borderColor="#000000" // Barva rámečku
       barColor="#FFFFFF" // Barva proužku
       ariaLabel="Common Loader" // Popis pro čtečky obrazovek
+      wrapperStyle={{ display: 'block', margin: 'auto' }} // Nastavení stylu
     />
   );
 };
