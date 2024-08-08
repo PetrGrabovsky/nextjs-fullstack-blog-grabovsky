@@ -7,6 +7,7 @@ import { menuItems } from '@/utils/data-mappings';
 import { MenuItem } from '@/utils/types';
 import Button from './button';
 import ThemeToggler from './theme-toggler';
+import { signIn, signOut, useSession } from 'next-auth/react';
 
 // Funkční komponenta Header
 const Header: FC = () => {
@@ -14,6 +15,8 @@ const Header: FC = () => {
   const [sticky, setSticky] = useState<boolean>(false);
   // Stav pro správu otevření a zavření mobilního menu
   const [navbarOpen, setNavbarOpen] = useState<boolean>(false);
+  // Použití useSession hooku pro získání dat o session
+  const { data: session } = useSession();
 
   // Funkce pro nastavení sticky navbaru na základě pozice scrollování
   const handleStickyNavbar = () => {
@@ -24,6 +27,12 @@ const Header: FC = () => {
   // Funkce pro přepínání stavu mobilního menu
   const handleNavbarToggle = () => {
     setNavbarOpen(!navbarOpen);
+  };
+
+  // Funkce pro přihlášení/odhlášení uživatele
+  const handleLoginButtonClick = () => {
+    if (session) signOut();
+    else signIn();
   };
 
   useEffect(() => {
@@ -123,7 +132,7 @@ const Header: FC = () => {
                 {/* Tlačítko pro vytvoření nového blogu */}
                 <Button onClick={() => {}} text="Create" />
                 {/* Tlačítko pro přihlášení */}
-                <Button onClick={() => {}} text="Login" />
+                <Button onClick={handleLoginButtonClick} text={session ? 'Logout' : 'Login'} />
                 <div className="flex items-center gap-3">
                   {/* Komponenta pro přepínání mezi světlým a tmavým tématem */}
                   <ThemeToggler />
