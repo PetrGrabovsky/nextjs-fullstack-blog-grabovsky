@@ -129,8 +129,8 @@ const Header: FC = () => {
                 </nav>
               </div>
               <div className="flex items-center justify-end gap-4 pr-16 lg:pr-0">
-                {/* Tlačítko pro vytvoření nového blogu */}
-                <Button onClick={() => {}} text="Create" />
+                {/* Zobrazí tlačítko Create pouze po přihlášení */}
+                {session && <Button onClick={() => {}} text="Create" />}
                 {/* Tlačítko pro přihlášení */}
                 <Button onClick={handleLoginButtonClick} text={session ? 'Logout' : 'Login'} />
                 <div className="flex items-center gap-3">
