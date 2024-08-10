@@ -8,6 +8,7 @@ import { MenuItem } from '@/utils/types';
 import Button from './button';
 import ThemeToggler from './theme-toggler';
 import { signIn, signOut, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 // Funkční komponenta Header
 const Header: FC = () => {
@@ -17,11 +18,12 @@ const Header: FC = () => {
   const [navbarOpen, setNavbarOpen] = useState<boolean>(false);
   // Použití useSession hooku pro získání dat o session
   const { data: session } = useSession();
+  // Použití Next.js routeru pro navigaci mezi stránkami
+  const router = useRouter();
 
   // Funkce pro nastavení sticky navbaru na základě pozice scrollování
   const handleStickyNavbar = () => {
-    if (window.scrollY >= 80) setSticky(true);
-    else setSticky(false);
+    setSticky(window.scrollY >= 80);
   };
 
   // Funkce pro přepínání stavu mobilního menu
@@ -32,7 +34,12 @@ const Header: FC = () => {
   // Funkce pro přihlášení/odhlášení uživatele
   const handleLoginButtonClick = () => {
     if (session) signOut();
-    else signIn();
+    else signIn('github');
+  };
+
+  // Funkce pro navigaci na stránku vytvoření nového blogu
+  const handleCreateButtonClick = () => {
+    router.push('/create');
   };
 
   useEffect(() => {
@@ -130,7 +137,7 @@ const Header: FC = () => {
               </div>
               <div className="flex items-center justify-end gap-4 pr-16 lg:pr-0">
                 {/* Zobrazí tlačítko Create pouze po přihlášení */}
-                {session && <Button onClick={() => {}} text="Create" />}
+                {session && <Button onClick={handleCreateButtonClick} text="Create" />}
                 {/* Tlačítko pro přihlášení */}
                 <Button onClick={handleLoginButtonClick} text={session ? 'Logout' : 'Login'} />
                 <div className="flex items-center gap-3">
