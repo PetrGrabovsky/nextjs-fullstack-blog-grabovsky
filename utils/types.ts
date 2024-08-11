@@ -14,3 +14,19 @@ export interface MenuItem {
   label: string; // Textový popis
   path: string; // Cesta (URL) pro danou položku menu
 }
+
+// Rozhraní pro možnosti kategorie
+export interface CategoryOption {
+  label: string; // Popis, který bude zobrazen uživateli
+  value: string; // Hodnota, která bude použita pro logiku
+}
+
+// Rozhraní pro položky formuláře, které definují jednotlivé prvky formuláře
+export interface FormControlItem {
+  id: string; // Unikátní identifikátor
+  label: string; // Popis položky formuláře
+  placeholder: string; // Placeholder
+  type: string; // Typ vstupu (např. text, email, password...)
+  component: string; // Použitá komponenta (např. input, select...)
+  options: CategoryOption[]; // Seznam možností, pokud je položka komponenta select
+}
