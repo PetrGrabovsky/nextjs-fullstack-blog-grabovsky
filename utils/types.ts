@@ -30,3 +30,11 @@ export interface FormControlItem {
   component: string; // Použitá komponenta (např. input, select...)
   options: CategoryOption[]; // Seznam možností, pokud je položka komponenta select
 }
+
+// Rozhraní pro data blogového formuláře
+export interface BlogFormData {
+  title: string; // Název příspěvku
+  description: string; // Obsah příspěvku
+  image: string; // URL obrázku blogového příspěvku
+  category: string; // Kategorie příspěvku
+}
