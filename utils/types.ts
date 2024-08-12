@@ -6,6 +6,8 @@ export type GlobalContextType = {
   loading: boolean;
   // Funkce pro nastavení stavu načítání
   setLoading: Dispatch<SetStateAction<boolean>>;
+  formData: BlogFormData;
+  setFormData: Dispatch<SetStateAction<BlogFormData>>;
 };
 
 // Rozhraní pro položky menu
