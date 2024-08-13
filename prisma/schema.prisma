@@ -1,25 +1,25 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// Nastavení generátoru Prisma Client
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client-js" // Definujeme, že generátor použije JS/TS klienta
 }
 
+// Definice zdroje dat (databáze) pro Prisma
 datasource db {
+  // Určuje použití PostgreSQL databáze
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // URL pro připojení s connection poolingem (doporučeno pro databázi hostovanou na Vercel)
+  url = env("POSTGRES_PRISMA_URL")
+  // URL pro přímé připojení bez poolingu, vhodné pro ladění (pro databázi na Vercel)
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model Post {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  image       String
-  category    String
-  userid      String
-  userimage   String
-  comments    String[]
+  id          Int      @id @default(autoincrement()) // Primární klíč s autoincrementem
+  title       String // Titulek blogového příspěvku
+  description String // Obsah blogového příspěvku
+  image       String // URL obrázku příspěvku
+  category    String // Kategorie příspěvku
+  userid      String // ID autora příspěvku
+  userimage   String // URL obrázku autora příspěvku
+  comments    String[] // Pole komentářů
 }
