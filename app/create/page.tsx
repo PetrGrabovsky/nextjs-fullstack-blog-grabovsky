@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Spinner from '@/components/spinner';
 import { GlobalContext } from '@/contexts/global-context';
 import { BlogFormData } from '@/utils/types';
+import { useSession } from 'next-auth/react';
 
 /**
  * Inicializace Firebase aplikace a úložiště
@@ -62,6 +63,8 @@ const Create: FC = () => {
   const { formData, setFormData } = useContext(GlobalContext);
   // Lokální stav pro sledování, zda se obrázek nahrává do Firebase Storage
   const [imageLoading, setImageLoading] = useState<boolean>(false);
+  // Použití hooku useSession pro získání dat o uživateli z aktuální session
+  const { data: session } = useSession();
 
   /**
    * Funkce pro zpracování změny obrázku blogu
@@ -101,6 +104,31 @@ const Create: FC = () => {
       ...prevData,
       [name]: value, // Dynamická aktualizace příslušného pole ve formData podle jeho názvu
     }));
+  };
+
+  /**
+   * Funkce pro uložení nového blogového příspěvku.
+   * Tato funkce odešle data z formuláře (včetně URL obrázku) na server pomocí HTTP POST
+   * požadavku, kde jsou data uložena do databáze. Úspěšnost operace je zatím logována.
+   */
+  const handleSaveBlogPost = async () => {
+    // Odeslání dat na server pro uložení do databáze
+    const res = await fetch('/api/blog-post/add-post', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...formData,
+        userid: session?.user?.name, // Přidání ID uživatele do dat formuláře
+        userimage: session?.user?.image, // Přidání URL obrázku uživatele do dat formuláře
+        comments: [], // Inicializace pole pro komentáře
+      }),
+    });
+
+    const data = await res.json(); // Parsování odpovědi ze serveru
+
+    console.log(data, 'data'); // Debugging: loguje odpověď serveru
   };
 
   return (
@@ -206,7 +234,7 @@ const Create: FC = () => {
                     ))}
                     <div className="w-full px-4">
                       {/* Tlačítko pro odeslání formuláře */}
-                      <Button text="Create New Blog" onClick={() => {}} />
+                      <Button text="Create New Blog" onClick={handleSaveBlogPost} />
                     </div>
                   </div>
                 </div>
