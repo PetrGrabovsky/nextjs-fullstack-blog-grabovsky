@@ -1,9 +1,48 @@
 'use client';
 
-import { FC } from 'react';
+import { ChangeEvent, FC, useContext, useState } from 'react';
 import clsx from 'clsx';
 import { formControls } from '@/utils/data-mappings';
 import Button from '@/components/button';
+import { initializeApp } from 'firebase/app';
+import { firebaseConfig } from '@/utils/configs';
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
+import { v4 as uuidv4 } from 'uuid';
+import Spinner from '@/components/spinner';
+import { GlobalContext } from '@/contexts/global-context';
+import { BlogFormData } from '@/utils/types';
+
+/**
+ * Inicializace Firebase aplikace a úložiště
+ * Tento kód inicializuje Firebase aplikaci pomocí konfiguračních údajů z firebaseConfig a získá
+ * instanci úložiště (storage) pro nahrávání souborů
+ */
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app, 'gs://nextjs-fullstack-grabovsky.appspot.com');
+
+/**
+ * Funkce pro uložení obrázku do Firebase a získání URL
+ * Tato funkce nahrává obrázek do Firebase Storage a vrací URL tohoto obrázku
+ * Proces je asynchronní, aby nedošlo k blokování hlavního vlákna
+ */
+const handleImageSaveToFirebase = async (file: File): Promise<string> => {
+  // Vytvoření reference k souboru s unikátním názvem
+  const storageRef = ref(storage, `blog/${uuidv4()}`);
+  // Nahrání souboru
+  const uploadImg = uploadBytesResumable(storageRef, file);
+
+  return new Promise((resolve, reject) => {
+    uploadImg.on(
+      'state_changed', // Sleduje stav nahrávání
+      () => {}, // Nevyužitá funkce pro zpracování změn stavu
+      (error) => reject(error), // Pokud dojde k chybě při nahrávání, vrátí ji
+      () => {
+        // Po úspěšném nahrání souboru získá jeho URL
+        getDownloadURL(uploadImg.snapshot.ref).then(resolve).catch(reject);
+      }
+    );
+  });
+};
 
 // Definice opakujících se TailwindCSS tříd pro inputy a labely
 const inputClasses = clsx(
@@ -13,8 +52,57 @@ const inputClasses = clsx(
 );
 const labelClasses = 'text-dark mb-3 block text-sm font-medium dark:text-white';
 
-// Funkční komponenta Create umožňující uživatelům vytvořit nový blogový příspěvek
+/**
+ * Funkční komponenta Create umožňující uživatelům vytvořit nový blogový příspěvek
+ * Zajišťuje formulářové rozhraní, kde uživatelé mohou nahrávat obrázky a vyplňovat informace
+ * o blogovém příspěvku, které budou následně odeslány na server
+ */
 const Create: FC = () => {
+  // Přístup ke globálnímu stavu pomocí Context API
+  const { formData, setFormData } = useContext(GlobalContext);
+  // Lokální stav pro sledování, zda se obrázek nahrává do Firebase Storage
+  const [imageLoading, setImageLoading] = useState<boolean>(false);
+
+  /**
+   * Funkce pro zpracování změny obrázku blogu
+   * Tato funkce je spuštěna při výběru obrázku uživatelem a následně tento obrázek nahraje
+   * na Firebase
+   */
+  const handleBlogImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files) return; // Pokud nejsou vybrány žádné soubory, funkce se ukončí
+
+    setImageLoading(true); // Nastaví stav nahrávání na true, což zobrazí spinner
+
+    try {
+      // Uloží obrázek do Firebase a získá jeho URL
+      const imageUrl = await handleImageSaveToFirebase(event.target.files[0]);
+      setFormData((prevData) => ({
+        ...prevData,
+        image: imageUrl, // Aktualizuje URL obrázku v globálním stavu
+      }));
+    } catch (error) {
+      console.error('Error uploading image: ', error); // Logování případných chyb
+    } finally {
+      setImageLoading(false); // Nastaví stav nahrávání na false, což skryje spinner
+    }
+  };
+
+  /**
+   * Funkce pro zpracování změn ve formulářových polích
+   * Tato funkce je universální pro všechna vstupní pole formuláře a aktualizuje globální stav
+   * při každé změně vstupu
+   */
+  const handleInputChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    // Destrukturalizace eventu pro získání názvu a hodnoty vstupu
+    const { name, value } = event.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value, // Dynamická aktualizace příslušného pole ve formData podle jeho názvu
+    }));
+  };
+
   return (
     <section className="overflow-hidden py-16 md:py-20 lg:py-28">
       <div className="container">
@@ -38,19 +126,28 @@ const Create: FC = () => {
               </h2>
               <div>
                 <div className="flex flex-col gap-3">
-                  <div>
-                    {/* Popis pro pole výběru obrázku */}
-                    <label htmlFor="fileInput" className={labelClasses}>
-                      Upload Blog Image
-                    </label>
-                    {/* Input pro výběr obrázku */}
-                    <input
-                      id="fileInput"
-                      accept="image/*"
-                      max={1000000}
-                      type="file"
-                      className={inputClasses}
-                    />
+                  <div className="flex gap-3">
+                    <div className={clsx(imageLoading ? 'w-1/2' : 'w-full')}>
+                      {/* Popis pro pole výběru obrázku */}
+                      <label htmlFor="fileInput" className={labelClasses}>
+                        Upload Blog Image
+                      </label>
+                      {/* Input pro výběr obrázku */}
+                      <input
+                        id="fileInput"
+                        accept="image/*"
+                        max={1000000}
+                        onChange={handleBlogImageChange}
+                        type="file"
+                        className={inputClasses}
+                      />
+                    </div>
+                    {/* Spinner pro indikaci nahrávání obrázku */}
+                    {imageLoading && (
+                      <div className="w-1/2">
+                        <Spinner />
+                      </div>
+                    )}
                   </div>
                   <div className="-mx-4 flex flex-wrap">
                     {/* Generování formulářových polí na základě definice v data-mappings.ts */}
@@ -67,6 +164,8 @@ const Create: FC = () => {
                             name={control.id}
                             type={control.type}
                             placeholder={control.placeholder}
+                            onChange={handleInputChange}
+                            value={formData[control.id as keyof BlogFormData]}
                             className={inputClasses}
                           />
                         )}
@@ -76,11 +175,19 @@ const Create: FC = () => {
                             name={control.id}
                             placeholder={control.placeholder}
                             rows={5}
+                            onChange={handleInputChange}
+                            value={formData[control.id as keyof BlogFormData]}
                             className={clsx(inputClasses, 'resize-none')}
                           />
                         )}
                         {control.component === 'select' && (
-                          <select id={control.id} name={control.id} className={inputClasses}>
+                          <select
+                            id={control.id}
+                            name={control.id}
+                            onChange={handleInputChange}
+                            value={formData[control.id as keyof BlogFormData]}
+                            className={inputClasses}
+                          >
                             <option value={''} id="">
                               Select
                             </option>
