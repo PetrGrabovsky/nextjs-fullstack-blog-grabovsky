@@ -40,3 +40,14 @@ export interface BlogFormData {
   image: string; // URL obrázku blogového příspěvku
   category: string; // Kategorie příspěvku
 }
+
+// Rozhraní reprezentující blogový příspěvek
+export interface Blog {
+  id: number; // Unikátní identifikátor
+  title: string; // Název příspěvku
+  description: string; // Obsah příspěvku
+  category: string; // Kategorie příspěvku
+  userid: string; // ID autora příspěvku
+  userimage: string; // URL obrázku autora příspěvku
+  comments: string[]; // Pole komentářů k příspěvku
+}
