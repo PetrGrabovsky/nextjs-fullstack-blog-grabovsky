@@ -45,6 +45,7 @@ export interface BlogFormData {
 export interface Blog {
   id: number; // Unikátní identifikátor
   title: string; // Název příspěvku
+  image: string; // Obrázek příspěvku
   description: string; // Obsah příspěvku
   category: string; // Kategorie příspěvku
   userid: string; // ID autora příspěvku
