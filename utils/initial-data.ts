@@ -14,4 +14,8 @@ export const initialGlobalContextState: GlobalContextType = {
   setLoading: () => {}, // Výchozí prázdná funkce pro setLoading
   formData: initialBlogFormData, // Inicializace formulářových dat na prázdné hodnoty
   setFormData: () => {}, // Výchozí prázdná funkce pro setFormData
+  searchQuery: '', // Výchozí hodnota vyhledávacího dotazu
+  setSearchQuery: () => {}, // Výchozí prázdná funkce pro nastavení vyhledávacího dotazu
+  searchResults: [], // Výchozí hodnota pro výsledky vyhledávání
+  setSearchResults: () => {}, // Výchozí prázdná funkce pro nastavení výsledků vyhledávání
 };
