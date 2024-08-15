@@ -6,8 +6,18 @@ export type GlobalContextType = {
   loading: boolean;
   // Funkce pro nastavení stavu načítání
   setLoading: Dispatch<SetStateAction<boolean>>;
+  // Data blogového formuláře
   formData: BlogFormData;
+  // Funkce pro nastavení dat blogového formuláře
   setFormData: Dispatch<SetStateAction<BlogFormData>>;
+  // Vyhledávací dotaz zadaný uživatelem
+  searchQuery: string;
+  // Funkce pro nastavení vyhledávacího dotazu
+  setSearchQuery: Dispatch<SetStateAction<string>>;
+  // Výsledky vyhledávání blogových příspěvků
+  searchResults: Blog[];
+  // Funkce pro nastavení výsledků vyhledávání
+  setSearchResults: Dispatch<SetStateAction<Blog[]>>;
 };
 
 // Rozhraní pro položky menu
