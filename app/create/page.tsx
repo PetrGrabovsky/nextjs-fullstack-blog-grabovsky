@@ -164,7 +164,7 @@ const Create: FC = () => {
                         max={1000000}
                         onChange={handleBlogImageChange}
                         type="file"
-                        className={inputClasses}
+                        className={clsx(inputClasses, 'mb-8')}
                       />
                     </div>
                     {/* Spinner pro indikaci nahrávání obrázku */}
@@ -191,7 +191,7 @@ const Create: FC = () => {
                             placeholder={control.placeholder}
                             onChange={handleInputChange}
                             value={formData[control.id as keyof BlogFormData]}
-                            className={inputClasses}
+                            className={clsx(inputClasses, 'mb-8')}
                           />
                         )}
                         {control.component === 'textarea' && (
@@ -202,7 +202,7 @@ const Create: FC = () => {
                             rows={5}
                             onChange={handleInputChange}
                             value={formData[control.id as keyof BlogFormData]}
-                            className={clsx(inputClasses, 'resize-none')}
+                            className={clsx(inputClasses, 'mb-8 resize-none')}
                           />
                         )}
                         {control.component === 'select' && (
@@ -211,7 +211,7 @@ const Create: FC = () => {
                             name={control.id}
                             onChange={handleInputChange}
                             value={formData[control.id as keyof BlogFormData]}
-                            className={inputClasses}
+                            className={clsx(inputClasses, 'mb-8')}
                           >
                             <option value={''} id="">
                               Select
