@@ -3,6 +3,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FC } from 'react';
 import clsx from 'clsx';
+import { useSession } from 'next-auth/react';
+import { FaTrash } from 'react-icons/fa';
 
 // Interface definující props komponenty SingleBlog
 interface SingleBlogProps {
@@ -13,6 +15,8 @@ interface SingleBlogProps {
 const SingleBlog: FC<SingleBlogProps> = ({ blogItem }) => {
   // Destrukturalizace vlastností z objektu blogItem
   const { image, category, title, description, userimage, userid } = blogItem;
+  // Získání informací o aktualní session uživatele
+  const { data: session } = useSession();
 
   return (
     <div>
@@ -72,6 +76,10 @@ const SingleBlog: FC<SingleBlogProps> = ({ blogItem }) => {
               <p className="mb-1 text-sm font-medium text-dark dark:text-white">
                 {userid.split('_')[0].toUpperCase()}
               </p>
+            </div>
+            <div>
+              {/* Zobrazení ikony pro smazání příspěvku, pokud je uživatel autorem příspěvku */}
+              {session?.user?.name === userid && <FaTrash size={30} className="cursor-pointer" />}
             </div>
           </div>
         </div>
