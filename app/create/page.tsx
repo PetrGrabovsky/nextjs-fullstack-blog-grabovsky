@@ -13,6 +13,7 @@ import { GlobalContext } from '@/contexts/global-context';
 import { BlogFormData } from '@/utils/types';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { inputClasses, labelClasses } from '@/utils/styles';
 
 /**
  * Inicializace Firebase aplikace a úložiště
@@ -45,14 +46,6 @@ const handleImageSaveToFirebase = async (file: File): Promise<string> => {
     );
   });
 };
-
-// Definice opakujících se TailwindCSS tříd pro inputy a labely
-const inputClasses = clsx(
-  'mb-8 w-full rounded-md border border-transparent px-6 py-3 text-base text-body-color',
-  'placeholder-body-color shadow-one outline-none focus:border-primary focus-visible:shadow-none',
-  'dark:bg-[#242B51] dark:shadow-signUp'
-);
-const labelClasses = 'text-dark mb-3 block text-sm font-medium dark:text-white';
 
 /**
  * Funkční komponenta Create umožňující uživatelům vytvořit nový blogový příspěvek
