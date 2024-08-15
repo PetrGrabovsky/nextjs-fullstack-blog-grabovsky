@@ -12,6 +12,7 @@ import Spinner from '@/components/spinner';
 import { GlobalContext } from '@/contexts/global-context';
 import { BlogFormData } from '@/utils/types';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 /**
  * Inicializace Firebase aplikace a úložiště
@@ -65,6 +66,7 @@ const Create: FC = () => {
   const [imageLoading, setImageLoading] = useState<boolean>(false);
   // Použití hooku useSession pro získání dat o uživateli z aktuální session
   const { data: session } = useSession();
+  const router = useRouter();
 
   /**
    * Funkce pro zpracování změny obrázku blogu
@@ -129,6 +131,8 @@ const Create: FC = () => {
     const data = await res.json(); // Parsování odpovědi ze serveru
 
     console.log(data, 'data'); // Debugging: loguje odpověď serveru
+
+    if (data && data.success) router.push('/blogs');
   };
 
   return (
