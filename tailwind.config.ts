@@ -4,9 +4,10 @@ import type { Config } from 'tailwindcss';
 const config: Config = {
   // Soubory, ve kterých bude TailwindCSS hledat třídy
   content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './pages/**/*.{js,ts,jsx,tsx,mdx}', // Soubory v adresáři pages
+    './components/**/*.{js,ts,jsx,tsx,mdx}', // Soubory v adresáři components
+    './app/**/*.{js,ts,jsx,tsx,mdx}', // Soubory v adresáři app
+    './utils/**/*.{js,ts,jsx,tsx}', // Soubory z adresáře utils
   ],
   // Povolení tmavého režimu
   darkMode: 'class',
