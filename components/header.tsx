@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useEffect, useState } from 'react';
+import { FC, useContext, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { menuItems } from '@/utils/data-mappings';
@@ -8,7 +8,9 @@ import { MenuItem } from '@/utils/types';
 import Button from './button';
 import ThemeToggler from './theme-toggler';
 import { signIn, signOut, useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { GlobalContext } from '@/contexts/global-context';
+import { stickyHeaderClasses, hamburgerLineClasses } from '@/utils/styles';
 
 // Funkční komponenta Header
 const Header: FC = () => {
@@ -18,8 +20,16 @@ const Header: FC = () => {
   const [navbarOpen, setNavbarOpen] = useState<boolean>(false);
   // Použití useSession hooku pro získání dat o session
   const { data: session } = useSession();
+  // Získání funkce pro aktualizaci výsledků vyhledávání z GlobalContextu
+  const { setSearchResults } = useContext(GlobalContext);
   // Použití Next.js routeru pro navigaci mezi stránkami
   const router = useRouter();
+  /**
+   * Získání aktuální cesty URL pomocí hooku usePathname.
+   * pathName se používá k rozpoznání změny stránky a vymazání výsledků vyhledávání při
+   * každé změně.
+   */
+  const pathName = usePathname();
 
   // Funkce pro nastavení sticky navbaru na základě pozice scrollování
   const handleStickyNavbar = () => {
@@ -52,16 +62,10 @@ const Header: FC = () => {
     };
   }, []); // Prázdné pole závislostí zajistí, že efekt bude spuštěn pouze při mountu
 
-  // Definice tříd pro header ve stavu sticky
-  const stickyHeaderClasses = clsx(
-    'shadow-sticky dark:!bg-primary !fixed !z-[9999] !bg-white !bg-opacity-80 backdrop-blur-sm',
-    '!transition dark:!bg-opacity-20'
-  );
-
-  // Společné třídy pro všechny span elementy hamburger ikony
-  const hamburgerLineClasses = clsx(
-    'relative my-1.5 block h-0.5 w-[30px] bg-black transition-all duration-300 dark:bg-white'
-  );
+  // Tento efekt se spustí při změně URL cesty a vymaže výsledky vyhledávání
+  useEffect(() => {
+    setSearchResults([]);
+  }, [pathName]);
 
   return (
     <div>
