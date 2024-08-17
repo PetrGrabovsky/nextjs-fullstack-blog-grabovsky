@@ -18,7 +18,25 @@ const BlogList: FC<BlogListProps> = ({ lists }) => {
   // Použití hooku useRouter pro možnost navigace a obnovení stránky
   const router = useRouter();
 
-  // Obnovení stránky (refresh) při načtení komponenty
+  /**
+   * Funkce pro odstranění blogového příspěvku.
+   * Odesílá požadavek na server pro smazání příspěvku s daným ID.
+   * Po úspěšném odstranění příspěvku obnoví stránku, aby se aktualizoval seznam příspěvků.
+   *
+   */
+  const handleDeleteBlog = async (id: number) => {
+    const res = await fetch(`/api/blog-post/delete-post?id=${id}`, {
+      method: 'DELETE',
+      cache: 'no-store',
+    });
+
+    const data = await res.json();
+
+    // Pokud je smazání úspěšné, obnoví stránku
+    if (data && data.success) router.refresh();
+  };
+
+  // Obnovení stránky (refresh) při načtení komponenty pro zajištění aktuálnosti dat
   useEffect(() => {
     router.refresh();
   }, []);
@@ -32,7 +50,7 @@ const BlogList: FC<BlogListProps> = ({ lists }) => {
             lists.map((listItem: Blog) => (
               <div key={listItem.id} className="px-4">
                 {/* Každý příspěvek zobrazen pomocí komponenty SingleBlog */}
-                <SingleBlog blogItem={listItem} />
+                <SingleBlog handleDeleteBlog={handleDeleteBlog} blogItem={listItem} />
               </div>
             ))}
         </div>
