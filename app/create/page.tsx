@@ -14,6 +14,7 @@ import { BlogFormData } from '@/utils/types';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { inputClasses, labelClasses } from '@/utils/styles';
+import { initialBlogFormData } from '@/utils/initial-data';
 
 /**
  * Inicializace Firebase aplikace a úložiště
@@ -105,6 +106,8 @@ const Create: FC = () => {
    * Funkce pro uložení nového blogového příspěvku.
    * Tato funkce odešle data z formuláře (včetně URL obrázku) na server pomocí HTTP POST
    * požadavku, kde jsou data uložena do databáze. Úspěšnost operace je zatím logována.
+   * Po úspěšném uložení příspěvku se formulář restartuje na výchozí hodnoty, aby byl
+   * připravený k vytvoření nového příspěvku.
    */
   const handleSaveBlogPost = async () => {
     // Odeslání dat na server pro uložení do databáze
@@ -125,7 +128,10 @@ const Create: FC = () => {
 
     console.log(data, 'data'); // Debugging: loguje odpověď serveru
 
-    if (data && data.success) router.push('/blogs');
+    if (data && data.success) {
+      setFormData(initialBlogFormData); // Reset formuláře na výchozí hodnoty
+      router.push('/blogs'); // Přesměrování na stránku s blogy
+    }
   };
 
   return (
