@@ -1,3 +1,4 @@
+// Importy nezbytných závislostí
 import { Blog } from '@/utils/types';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,13 +10,19 @@ import { FaTrash } from 'react-icons/fa';
 // Interface definující props komponenty SingleBlog
 interface SingleBlogProps {
   blogItem: Blog; // Objekt reprezentující jednotlivý blogový příspěvek
+  handleDeleteBlog: (id: number) => Promise<void>; // Funkce pro odstranění blogového příspěvku
 }
 
-// Komponenta SingleBlog zobrazuje jeden blogový příspěvek
-const SingleBlog: FC<SingleBlogProps> = ({ blogItem }) => {
-  // Destrukturalizace vlastností z objektu blogItem
-  const { image, category, title, description, userimage, userid } = blogItem;
-  // Získání informací o aktualní session uživatele
+/**
+ * Komponenta SingleBlog.
+ * Tato komponenta zobrazuje jeden blogový příspěvek včetně jeho obrázku, titulku, popisu
+ * a dalších relevantních informací. Pokud je přihlášený uživatel autorem příspěvku,
+ * zobrazí se také ikona pro odstranění příspěvku.
+ */
+const SingleBlog: FC<SingleBlogProps> = ({ blogItem, handleDeleteBlog }) => {
+  // Destrukturalizace potřebných vlastností z objektu blogItem
+  const { image, category, title, description, userimage, userid, id } = blogItem;
+  // Získání informací o aktualní session pro zjištění, zda je uživatel autorem příspěvku
   const { data: session } = useSession();
 
   return (
@@ -79,7 +86,14 @@ const SingleBlog: FC<SingleBlogProps> = ({ blogItem }) => {
             </div>
             <div>
               {/* Zobrazení ikony pro smazání příspěvku, pokud je uživatel autorem příspěvku */}
-              {session?.user?.name === userid && <FaTrash size={30} className="cursor-pointer" />}
+              {session?.user?.name === userid && (
+                <FaTrash
+                  // Volání funkce handleDeleteBlog s ID příspěvku
+                  onClick={() => handleDeleteBlog(id)}
+                  size={30}
+                  className="cursor-pointer"
+                />
+              )}
             </div>
           </div>
         </div>
