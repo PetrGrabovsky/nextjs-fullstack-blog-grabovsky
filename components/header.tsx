@@ -20,8 +20,8 @@ const Header: FC = () => {
   const [navbarOpen, setNavbarOpen] = useState<boolean>(false);
   // Použití useSession hooku pro získání dat o session
   const { data: session } = useSession();
-  // Získání funkce pro aktualizaci výsledků vyhledávání z GlobalContextu
-  const { setSearchResults } = useContext(GlobalContext);
+  // Získání funkcí pro aktualizaci výsledků vyhledávání a vyhledávacího dotazu
+  const { setSearchResults, setSearchQuery } = useContext(GlobalContext);
   // Použití Next.js routeru pro navigaci mezi stránkami
   const router = useRouter();
   /**
@@ -62,9 +62,13 @@ const Header: FC = () => {
     };
   }, []); // Prázdné pole závislostí zajistí, že efekt bude spuštěn pouze při mountu
 
-  // Tento efekt se spustí při změně URL cesty a vymaže výsledky vyhledávání
+  /**
+   * Tento efekt se spustí při změně URL cesty, vymaže výsledky vyhledávání a resetuje
+   * vyhledávací dotaz.
+   */
   useEffect(() => {
     setSearchResults([]);
+    setSearchQuery('');
   }, [pathName]);
 
   return (
