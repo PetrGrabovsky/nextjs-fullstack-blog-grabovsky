@@ -28,13 +28,13 @@ export const inputClasses = clsx(
 // Definice opakujících se TailwindCSS tříd pro labely
 export const labelClasses = 'text-dark mb-3 block text-sm font-medium dark:text-white';
 
-// Definice opakujících se TailwindCSS tříd pro nadpis <h2> v komponentě CategoryList.
-export const categoryH2Styles = clsx(
+// Definice opakujících se TailwindCSS tříd pro nadpis <h2>
+export const headingH2Classes = clsx(
   'mb-8 text-3xl font-bold leading-tight text-black dark:text-white sm:text-4xl'
 );
 
-// Definice opakujících se TailwindCSS tříd pro nadpis <h3> v komponentě CategoryList.
-export const categoryH3Styles = clsx(
+// Definice opakujících se TailwindCSS tříd pro nadpis <h3>
+export const headingH3Classes = clsx(
   'border-b border-body-color border-opacity-10 px-8 py-4 text-lg font-semibold text-black',
   'dark:border-white dark:border-opacity-10 dark:text-white'
 );
