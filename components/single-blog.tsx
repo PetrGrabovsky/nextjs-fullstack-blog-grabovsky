@@ -49,7 +49,7 @@ const SingleBlog: FC<SingleBlogProps> = ({ blogItem, handleDeleteBlog }) => {
         {/* Zobrazení nadpisu blogového příspěvku */}
         <h3>
           <Link
-            href={'/'}
+            href={`/blogs/${id}`} // Odkaz na detailní stránku konkrétního příspěvku
             className={clsx(
               'mb-4 block overflow-hidden text-ellipsis whitespace-nowrap text-xl font-bold',
               'text-black hover:text-primary dark:text-white dark:hover:text-primary',
