@@ -10,7 +10,7 @@ export const menuItems: MenuItem[] = [
   {
     id: 'category',
     label: 'Category',
-    path: '/category', // Adresa category stránky
+    path: '/category/application', // Adresa category stránky
   },
   {
     id: 'blogs',
