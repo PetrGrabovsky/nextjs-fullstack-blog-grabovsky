@@ -38,3 +38,8 @@ export const headingH3Classes = clsx(
   'border-b border-body-color border-opacity-10 px-8 py-4 text-lg font-semibold text-black',
   'dark:border-white dark:border-opacity-10 dark:text-white'
 );
+
+// Definice opakujících se TailwindCSS tříd pro paragraf <p>
+export const paragraphClasses = clsx(
+  'mb-8 text-base font-medium text-body-color sm:text-lg lg:text-base leading-relaxed xl:text-lg'
+);

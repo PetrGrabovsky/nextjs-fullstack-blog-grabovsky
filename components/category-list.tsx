@@ -5,7 +5,7 @@ import { FC } from 'react';
 import clsx from 'clsx';
 import Button from './button';
 import { useRouter } from 'next/navigation';
-import { categoryH2Styles, categoryH3Styles } from '@/utils/styles';
+import { headingH2Classes, headingH3Classes, paragraphClasses } from '@/utils/styles';
 import Image from 'next/image';
 import { categories } from '@/utils/data-mappings';
 import Link from 'next/link';
@@ -55,7 +55,7 @@ const CategoryList: FC<CategoryListProps> = ({ list }) => {
             {getLatestBlogForCurrentCategory === null ? (
               <div className="flex flex-col gap-4">
                 {/* Zobrazení informace o neexistujícím příspěvku */}
-                <h2 className={categoryH2Styles}>
+                <h2 className={headingH2Classes}>
                   No blog available for this category! Please create one.
                 </h2>
                 {/* Tlačítko pro vytvoření nového příspěvku */}
@@ -65,7 +65,7 @@ const CategoryList: FC<CategoryListProps> = ({ list }) => {
               // Pokud existuje alespoň jeden příspěvek, zobrazí se nejnovější
               <div>
                 {/* Nadpis nejnovějšího příspěvku */}
-                <h2 className={categoryH2Styles}>{getLatestBlogForCurrentCategory?.title}</h2>
+                <h2 className={headingH2Classes}>{getLatestBlogForCurrentCategory?.title}</h2>
                 <div className="mb-10 w-full overflow-hidden rounded">
                   <div className="sm:aspect[97/44] relative aspect-[97/60] w-full">
                     {/* Obrázek nejnovějšího příspěvku */}
@@ -78,14 +78,7 @@ const CategoryList: FC<CategoryListProps> = ({ list }) => {
                   </div>
                 </div>
                 {/* Popis (obsah) nejnovějšího příspěvku */}
-                <p
-                  className={clsx(
-                    'mb-8 text-base font-medium text-body-color sm:text-lg lg:text-base',
-                    'leading-relaxed xl:text-lg'
-                  )}
-                >
-                  {getLatestBlogForCurrentCategory?.description}
-                </p>
+                <p className={paragraphClasses}>{getLatestBlogForCurrentCategory?.description}</p>
               </div>
             )}
           </div>
@@ -93,7 +86,7 @@ const CategoryList: FC<CategoryListProps> = ({ list }) => {
           <div className="w-full px-4 lg:w-4/12">
             {/* Filtrování podle kategorií */}
             <div className="mb-10 rounded-md bg-primary bg-opacity-5 dark:bg-opacity-10">
-              <h3 className={categoryH3Styles}>Filter by Categoty</h3>
+              <h3 className={headingH3Classes}>Filter by Categoty</h3>
               <div className="flex flex-wrap px-8 py-6">
                 {/* Dynamické generování tlačítek pro každou kategorii */}
                 {categories.map((categoryItem) => (
@@ -112,7 +105,7 @@ const CategoryList: FC<CategoryListProps> = ({ list }) => {
             </div>
             {/* Zobrazení souvisejících příspěvků */}
             <div className="mb-10 rounded-md bg-primary bg-opacity-5 dark:bg-opacity-10">
-              <h3 className={categoryH3Styles}>Related Blogs</h3>
+              <h3 className={headingH3Classes}>Related Blogs</h3>
               <ul className="p-8">
                 {/* Generování seznamu souvisejících příspěvků, nebo info, žé žádné neexistují */}
                 {relatedBlogs && relatedBlogs.length ? (
