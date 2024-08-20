@@ -12,12 +12,12 @@ export const GET = async (req: NextRequest) => {
     const url = new URL(req.url);
 
     // Získání hodnoty query parametru blogId
-    const blogId = url.searchParams.get('blogId');
+    const blogID = url.searchParams.get('blogID');
 
     // Vyhledání detailů příspěvku v databázi na základě ID pomocí Prisma OMR
     const blogDetails = await prisma.post.findUnique({
       where: {
-        id: Number(blogId), // Převod ID z query parametru na číslo a použití ve vyhledávání
+        id: Number(blogID), // Převod ID z query parametru na číslo a použití ve vyhledávání
       },
     });
 
