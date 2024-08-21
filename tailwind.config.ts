@@ -19,17 +19,6 @@ const config: Config = {
       // Vnitřní odsazení kontejneru
       padding: '1rem',
     },
-    // Definice vlastních barev
-    colors: {
-      current: 'currentColor',
-      transparent: 'transparent',
-      white: '#FFFFFF',
-      black: '#090E34',
-      dark: '#1D2144',
-      primary: '#4A6CF7',
-      yellow: '#FBB040',
-      'body-color': '#959CB1',
-    },
     // Definice breakpointů pro responzivní design
     screens: {
       xs: '450px',
@@ -40,6 +29,17 @@ const config: Config = {
       '2xl': '1400px',
     },
     extend: {
+      // Definice vlastních barev
+      colors: {
+        current: 'currentColor',
+        transparent: 'transparent',
+        white: '#FFFFFF',
+        black: '#090E34',
+        dark: '#1D2144',
+        primary: '#4A6CF7',
+        yellow: '#FBB040',
+        'body-color': '#959CB1',
+      },
       // Definice stínů
       boxShadow: {
         signUp: '0px 5px 10px rgba(4, 10, 34, 0.2)',
