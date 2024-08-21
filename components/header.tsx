@@ -76,7 +76,7 @@ const Header: FC = () => {
       <header
         className={clsx(
           sticky ? stickyHeaderClasses : 'absolute', // Podmíněné přídání tříd pro sticky stav
-          'left-0 top-0 flex w-full items-center bg-transparent' // Společné pro oba stavy
+          'left-0 top-0 z-40 flex w-full items-center bg-transparent' // Společné pro oba stavy
         )}
       >
         <div className="container">
