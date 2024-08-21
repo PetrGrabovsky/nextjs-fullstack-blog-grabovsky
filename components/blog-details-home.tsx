@@ -2,11 +2,13 @@
 
 import { headingH2Classes, paragraphClasses } from '@/utils/styles';
 import { Blog } from '@/utils/types';
-import { FC, useEffect, useRef } from 'react';
+import { ChangeEvent, FC, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import Image from 'next/image';
 import Link from 'next/link';
 import Button from './button';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 /**
  * Typový interface pro props komponenty BlogDetailsHome.
@@ -21,11 +23,57 @@ interface BlogDetailsHomeProps {
  * Komponenta BlogDetailHome.
  * Tato komponenta zobrazuje detailní informace o konkrétním blogovém příspěvku,
  * včetně titulku, obrázku, popisu, autora a kategorie.
- * Umožňuje také přidání komentáře k příspěvku.
+ * Umožňuje také přidání komentáře k příspěvku a zobrazení diskuze pod příspěvkem.
  */
 const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData }) => {
+  // Použití useState pro uložení a nastavení textu komentáře, který uživatel píše do inputu
+  const [comment, setComment] = useState<string>('');
+  // Použití useSession pro získání informací o aktualní session kvůli identifikaci uživatele
+  const { data: session } = useSession();
   // Použití useRef k získání přístupu k inputu pro komentáře (kvůli nastavení focusu)
   const commentInputRef = useRef<HTMLInputElement>(null);
+  // Hook useRouter pro možnost navigace a obnovení stránky (refresh)
+  const router = useRouter();
+
+  /**
+   * Funkce handleCommentSave.
+   * Tato funkce obsluhuje událost kliknutí na tlačítko pro přidání komentáře.
+   * Uloží nový komentář ke konkrétnímu příspěvku prostřednictvím API požadavku.
+   */
+  const handleCommentSave = async () => {
+    // Přidání nového komentáře do seznamu stávajících komentářů
+    const extractComments = [...blogData.comments];
+    extractComments.push(`${comment}|${session?.user?.name}`);
+
+    // Odeslání požadavku na aktualizaci příspěvku s novým komentářem
+    const response = await fetch(`/api/blog-post/update-post`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: blogData?.id,
+        comments: extractComments,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data && data.success) {
+      // Po úspěšném uložení se input pro komentáře vyprázdní a stránka se obnoví (refresh)
+      setComment('');
+      router.refresh();
+    }
+  };
+
+  /**
+   * Funkce handleCommentChange.
+   * Tato funkce se spouští při změně hodnoty inputu pro komentáře.
+   * Aktualizuje stav comment pomocí setteru setComment na aktuální hodnotu v inputu.
+   */
+  const handleCommentChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setComment(event.target.value);
+  };
 
   useEffect(() => {
     // Nastavení focusu na input po vykreslení komponenty
@@ -107,14 +155,55 @@ const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData }) => {
               ref={commentInputRef} // Použití ref umožňuje přímý přístup k DOM elementu
               autoComplete="off"
               placeholder="Add comment here"
+              value={comment}
+              onChange={handleCommentChange} // Při změně se aktualizuje stav comment
               className={clsx(
                 'w-full rounded-md border border-transparent px-6 py-3 text-base text-body-color',
                 'placeholder-body-color shadow-one outline-none focus:border-primary',
                 'focus-visible:shadow-none dark:bg-[#242B51] dark:shadow-signUp'
               )}
             />
-            <Button text="Add" onClick={() => {}} />
+            {/* Tlačítko pro uložení komentáře */}
+            <Button text="Add" onClick={handleCommentSave} />
           </div>
+          {/* Sekce pro zobrazení diskuze pod příspěvkem */}
+          <section className="w-full py-8 dark:bg-gray-900 lg:w-8/12 lg:py-16">
+            <div className="mb-6 flex items-center justify-between">
+              {/* Zobrazení celkového počtu komentářů u příspěvku */}
+              <h2 className="text-lg font-bold text-black dark:text-white lg:text-2xl">
+                Discussion ({blogData?.comments.length})
+              </h2>
+            </div>
+            {/* Zobrazení komentářů příspěvku, pokud nějaké existují */}
+            {blogData && blogData.comments && blogData.comments.length > 0
+              ? blogData.comments.map((comment, index) => (
+                  <div key={index} className="rounded-lg p-6 text-base dark:bg-gray-900">
+                    <div className="mb-2 flex items-center justify-between">
+                      <div className="flex items-center">
+                        <p
+                          className={clsx(
+                            'mr-3 inline-flex items-center text-sm text-black dark:text-white',
+                            'font-semibold'
+                          )}
+                        >
+                          {/* Zobrazení jména autora komentáře. Pokud je komentář od autora
+                              příspěvku, zobrazí se za jeho jménem text (Author).
+                              Kód rozděluje komentář na dvě části oddělené znakem |.
+                              Druhá část obsahuje ID autora komentáře.
+                              Pokud se ID autora komentáře shoduje s ID autora příspěvku,
+                              přidá se za jméno označení (Author) */}
+                          {comment.split('|')[1] === blogData?.userid
+                            ? `${comment.split('|')[1].split('_')[0]} (Author)`
+                            : comment.split('|')[1].split('_')[0]}
+                        </p>
+                      </div>
+                    </div>
+                    {/* Zobrazení samotného komentáře */}
+                    <p className="text-gray-500 dark:text-gray-400">{comment.split('|')[0]}</p>
+                  </div>
+                ))
+              : null}
+          </section>
         </div>
       </div>
     </section>
