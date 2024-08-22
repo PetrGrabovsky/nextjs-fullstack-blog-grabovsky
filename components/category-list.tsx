@@ -134,7 +134,7 @@ const CategoryList: FC<CategoryListProps> = ({ list }) => {
                           <h5>
                             {/* Odkaz na detail příspěvku */}
                             <Link
-                              href={'/'}
+                              href={`/blogs/${item.id}`}
                               className={clsx(
                                 'mb-[8px] block text-base font-medium text-black dark:text-white',
                                 'hover:text-primary dark:hover:text-primary'
