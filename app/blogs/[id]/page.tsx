@@ -9,7 +9,10 @@ import { FC } from 'react';
 const extractBlogDetails = async (id: string) => {
   const res = await fetch(`${process.env.URL}/api/blog-post/blog-details?blogID=${id}`, {
     method: 'GET',
-    cache: 'no-store', // Zajištění, že se vždy načítají aktualní data, cache se nevyužívá
+    // Konfigurace pro okamžitou invalidaci cache a zajištění, že se vždy načtou aktuální data
+    next: {
+      revalidate: 0,
+    },
   });
 
   const data = await res.json(); // Parsování odpovědi z API do JSON formátu
