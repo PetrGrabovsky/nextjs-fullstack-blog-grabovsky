@@ -164,22 +164,27 @@ const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData }) => {
           </div>
           {/* Sekce pro přidání komentáře */}
           <div className="flex w-full gap-4 lg:w-8/12">
-            <input
-              name="comment"
-              id="comment"
-              ref={commentInputRef} // Použití ref umožňuje přímý přístup k DOM elementu
-              autoComplete="off"
-              placeholder="Add comment here"
-              value={comment}
-              onChange={handleCommentChange} // Při změně se aktualizuje stav comment
-              className={clsx(
-                'w-full rounded-md border border-transparent px-6 py-3 text-base text-body-color',
-                'placeholder-body-color shadow-one outline-none focus:border-primary',
-                'focus-visible:shadow-none dark:bg-[#242B51] dark:shadow-signUp'
-              )}
-            />
-            {/* Tlačítko pro uložení komentáře */}
-            <Button text="Add" onClick={handleCommentSave} />
+            {/* Input a tlačítko pro přidání komentáře se zobrazí pokud je uživatel přihlášen. */}
+            {session !== null ? (
+              <>
+                <input
+                  name="comment"
+                  id="comment"
+                  ref={commentInputRef} // Použití ref umožňuje přímý přístup k DOM elementu
+                  autoComplete="off"
+                  placeholder="Add comment here"
+                  value={comment}
+                  onChange={handleCommentChange} // Při změně se aktualizuje stav comment
+                  className={clsx(
+                    'w-full rounded-md border border-transparent px-6 py-3 text-base text-body-color',
+                    'placeholder-body-color shadow-one outline-none focus:border-primary',
+                    'focus-visible:shadow-none dark:bg-[#242B51] dark:shadow-signUp'
+                  )}
+                />
+                {/* Tlačítko pro uložení komentáře */}
+                <Button text="Add" onClick={handleCommentSave} />
+              </>
+            ) : null}
           </div>
           {/* Sekce pro zobrazení diskuze pod příspěvkem */}
           <section className="w-full py-8 dark:bg-gray-900 lg:w-8/12 lg:py-16">
