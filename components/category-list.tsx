@@ -64,8 +64,15 @@ const CategoryList: FC<CategoryListProps> = ({ list }) => {
             ) : (
               // Pokud existuje alespoň jeden příspěvek, zobrazí se nejnovější
               <div>
-                {/* Nadpis nejnovějšího příspěvku */}
-                <h2 className={headingH2Classes}>{getLatestBlogForCurrentCategory?.title}</h2>
+                {/* Nadpis nejnovějšího příspěvku jako odkaz na detailní stránku */}
+                <h2 className={headingH2Classes}>
+                  <Link
+                    href={`/blogs/${getLatestBlogForCurrentCategory?.id}`}
+                    className="hover:text-primary"
+                  >
+                    {getLatestBlogForCurrentCategory?.title}
+                  </Link>
+                </h2>
                 <div className="mb-10 w-full overflow-hidden rounded">
                   <div className="sm:aspect[97/44] relative aspect-[97/60] w-full">
                     {/* Obrázek nejnovějšího příspěvku */}
