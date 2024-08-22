@@ -80,6 +80,21 @@ const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData }) => {
     if (commentInputRef.current) commentInputRef.current.focus();
   }, []);
 
+  /**
+   * Použití useEffect pro automatickou aktualizaci stránky každé 2 sekundy.
+   * Interval je nastaven pro pravidelné obnovení obsahu diskuze.
+   */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.refresh();
+    }, 2000);
+
+    // Funkce pro vyčištění intervalu při odpojení komponenty.
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
   // Pokud nejsou k dispozici žádná data pro blog, komponenta se nevykreslí
   if (!blogData) return;
 
