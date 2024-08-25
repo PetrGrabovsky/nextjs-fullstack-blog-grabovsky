@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { storage } from '@/database/firebase';
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { getDownloadURL, ref, uploadBytesResumable, deleteObject } from 'firebase/storage';
 
 /**
  * Uloží obrázek do Firebase Storage a vrátí URL k tomuto obrázku.
@@ -33,5 +33,29 @@ export const handleImageSaveToFirebase = async (file: File): Promise<string> => 
     // Loguje chybu do konzole a vyhodní novou chybu, která může být zachycena volajícím kódem
     console.error('Error uploading image to Firebase:', error);
     throw new Error('Failed to upload image');
+  }
+};
+
+/**
+ * Smaže obrázek z Firebase Storage podle jeho URL.
+ * Tato funkce příjmá URL obrázku, extrahuje z něj cestu k souboru ve Firebase Storage
+ * a náslědně tento obrázek odstraní.
+ */
+export const deleteImageFromFirebase = async (imageUrl: string): Promise<void> => {
+  try {
+    // Extrahování cesty k souboru z URL
+    const storagePath = imageUrl.split('/o/')[1].split('?')[0];
+    const decodedPath = decodeURIComponent(storagePath);
+
+    // Vytvoření reference k souboru na základě extrahované cesty¨
+    const imageRef = ref(storage, decodedPath);
+
+    // Smazání souboru z Firebase Storage
+    await deleteObject(imageRef);
+  } catch (error) {
+    // Logování chyby do konzole a vyhození nové chyby
+    console.error('Error deleting image from Firebase:', error);
+
+    throw new Error('Failed to delete image');
   }
 };
