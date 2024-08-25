@@ -7,7 +7,7 @@ import { GlobalContext } from '@/contexts/global-context';
 import { Blog } from '@/utils/types';
 import SingleBlog from '@/components/single-blog';
 import { inputClasses } from '@/utils/styles';
-import { handleDeleteBlogPost } from '@/utils/helpers';
+import { handleDeleteBlogPost, normalizeSearchQuery } from '@/utils/helpers';
 
 /**
  * Komponenta Search poskytuje funkce pro vyhledávání blogových příspěvků.
@@ -36,14 +36,6 @@ const Search: FC = () => {
    */
   const handleSearchInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-  };
-
-  /**
-   * Pomocná funkce pro normalizaci vyhledávacího dotazu.
-   * Odstraní nadbytečné mezery a převede dotaz na malá písmena.
-   */
-  const normalizeSearchQuery = (query: string) => {
-    return query.trim().toLowerCase();
   };
 
   /**

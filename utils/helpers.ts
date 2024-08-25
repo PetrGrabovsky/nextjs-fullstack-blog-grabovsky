@@ -87,3 +87,11 @@ export const handleDeleteBlogPost = async (id: number, imageUrl: string): Promis
     return false;
   }
 };
+
+/**
+ * Pomocná funkce pro normalizaci vyhledávacího dotazu.
+ * Odstraní nadbytečné mezery a převede dotaz na malá písmena.
+ */
+export const normalizeSearchQuery = (query: string) => {
+  return query.trim().toLowerCase();
+};
