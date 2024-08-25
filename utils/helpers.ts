@@ -3,25 +3,35 @@ import { storage } from '@/database/firebase';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 
 /**
- * Funkce pro uložení obrázku do Firebase a získání URL
- * Tato funkce nahrává obrázek do Firebase Storage a vrací URL tohoto obrázku
- * Proces je asynchronní, aby nedošlo k blokování hlavního vlákna
+ * Uloží obrázek do Firebase Storage a vrátí URL k tomuto obrázku.
+ * Tato funkce nahrává soubor do Firebase Storage, ke je uložen ve složce blog s unikátním
+ * náhodně vygenerovaným názvem. Po dokončení nahrávání vrací přímý odkaz (URL) na tento obrázek.
+ * V případě chyby při nahrávání nebo získávání URL vrací chybu.
  */
 export const handleImageSaveToFirebase = async (file: File): Promise<string> => {
-  // Vytvoření reference k souboru s unikátním názvem
-  const storageRef = ref(storage, `blog/${uuidv4()}`);
-  // Nahrání souboru
-  const uploadImg = uploadBytesResumable(storageRef, file);
+  try {
+    /**
+     * Vytvoření reference v úložišti Firebase pro nový soubor.
+     * Reference zahrnuje složku blog a unikátní název souboru generovaný pomocí UUID.
+     */
+    const storageRef = ref(storage, `blog/${uuidv4()}`);
 
-  return new Promise((resolve, reject) => {
-    uploadImg.on(
-      'state_changed', // Sleduje stav nahrávání
-      () => {}, // Nevyužitá funkce pro zpracování změn stavu
-      (error) => reject(error), // Pokud dojde k chybě při nahrávání, vrátí ji
-      () => {
-        // Po úspěšném nahrání souboru získá jeho URL
-        getDownloadURL(uploadImg.snapshot.ref).then(resolve).catch(reject);
-      }
-    );
-  });
+    /**
+     * Zahájí nahrávání souboru do FirebaseStorage.
+     * uploadBytesResumable umožňuje sledování stavu nahrávání
+     */
+    const uploadImg = uploadBytesResumable(storageRef, file);
+
+    // Asynchronně čeká na dokončení nahrávání
+    await new Promise<void>((resolve, reject) => {
+      uploadImg.on('state_changed', null, reject, resolve);
+    });
+
+    // Po úspěšném nahrání souboru získá URL pro přístup k nahranému souboru.
+    return await getDownloadURL(uploadImg.snapshot.ref);
+  } catch (error) {
+    // Loguje chybu do konzole a vyhodní novou chybu, která může být zachycena volajícím kódem
+    console.error('Error uploading image to Firebase:', error);
+    throw new Error('Failed to upload image');
+  }
 };
