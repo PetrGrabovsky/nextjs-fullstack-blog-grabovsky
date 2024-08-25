@@ -4,10 +4,6 @@ import { ChangeEvent, FC, useContext, useState } from 'react';
 import clsx from 'clsx';
 import { formControls } from '@/utils/data-mappings';
 import Button from '@/components/button';
-import { initializeApp } from 'firebase/app';
-import { firebaseConfig } from '@/utils/configs';
-import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid';
 import Spinner from '@/components/spinner';
 import { GlobalContext } from '@/contexts/global-context';
 import { BlogFormData } from '@/utils/types';
@@ -15,38 +11,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { inputClasses, labelClasses } from '@/utils/styles';
 import { initialBlogFormData } from '@/utils/initial-data';
-
-/**
- * Inicializace Firebase aplikace a úložiště
- * Tento kód inicializuje Firebase aplikaci pomocí konfiguračních údajů z firebaseConfig a získá
- * instanci úložiště (storage) pro nahrávání souborů
- */
-const app = initializeApp(firebaseConfig);
-const storage = getStorage(app, 'gs://nextjs-fullstack-grabovsky.appspot.com');
-
-/**
- * Funkce pro uložení obrázku do Firebase a získání URL
- * Tato funkce nahrává obrázek do Firebase Storage a vrací URL tohoto obrázku
- * Proces je asynchronní, aby nedošlo k blokování hlavního vlákna
- */
-const handleImageSaveToFirebase = async (file: File): Promise<string> => {
-  // Vytvoření reference k souboru s unikátním názvem
-  const storageRef = ref(storage, `blog/${uuidv4()}`);
-  // Nahrání souboru
-  const uploadImg = uploadBytesResumable(storageRef, file);
-
-  return new Promise((resolve, reject) => {
-    uploadImg.on(
-      'state_changed', // Sleduje stav nahrávání
-      () => {}, // Nevyužitá funkce pro zpracování změn stavu
-      (error) => reject(error), // Pokud dojde k chybě při nahrávání, vrátí ji
-      () => {
-        // Po úspěšném nahrání souboru získá jeho URL
-        getDownloadURL(uploadImg.snapshot.ref).then(resolve).catch(reject);
-      }
-    );
-  });
-};
+import { handleImageSaveToFirebase } from '@/utils/helpers';
 
 /**
  * Funkční komponenta Create umožňující uživatelům vytvořit nový blogový příspěvek
