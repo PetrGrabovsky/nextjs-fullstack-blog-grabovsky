@@ -7,6 +7,7 @@ import { GlobalContext } from '@/contexts/global-context';
 import { Blog } from '@/utils/types';
 import SingleBlog from '@/components/single-blog';
 import { inputClasses } from '@/utils/styles';
+import { handleDeleteBlogPost } from '@/utils/helpers';
 
 /**
  * Komponenta Search poskytuje funkce pro vyhledávání blogových příspěvků.
@@ -72,19 +73,17 @@ const Search: FC = () => {
   };
 
   /**
-   * Handler pro mazání blogového příspěvku.
-   * Odesílá požadavek na smazaní konkrétního příspěvku podle jeho ID.
+   * Handler pro mazání blogového příspěvku a přidruženého obrázku.
+   * Používá helper funkci handleDeleteBlogPost, která odstraní obrázek z Firebase a poté
+   * odešle požadavek na server pro smazání příspěvku z databáze.
+   * Pokud je operace úspěšná, aktualizuje výsledky vyhledávání.
    */
-  const handleDeleteBlog = async (id: number) => {
-    const res = await fetch(`/api/blog-post/delete-post?id=${id}`, {
-      method: 'DELETE',
-      cache: 'no-store', // Zajištění, že se načítají aktualní data
-    });
+  const handleDeleteBlog = async (id: number, imageUrl: string) => {
+    // Volá helper funkci pro smazání příspěvku a obrázku
+    const success = await handleDeleteBlogPost(id, imageUrl);
 
-    const data = await res.json();
-
-    // Po úspěšném odstranění příspěvku aktualizujeme výsledky vyhledávání
-    if (data && data.success) helperFunctionToFetchSearchResult(searchQuery);
+    // Pokud je operace úspěšná, obnoví výsledky vyhledávání
+    if (success) helperFunctionToFetchSearchResult(searchQuery);
   };
 
   /**
@@ -148,7 +147,12 @@ const Search: FC = () => {
                   // Mapování výsledků vyhledávání, kde je každý výsledek zobrazen v SingleBlog
                   searchResults.map((searchBlogItem: Blog) => (
                     <div key={searchBlogItem.id} className="w-full px-4 md:w-2/3 lg:w-1/2 xl:w-1/3">
-                      <SingleBlog handleDeleteBlog={handleDeleteBlog} blogItem={searchBlogItem} />
+                      <SingleBlog
+                        handleDeleteBlog={() =>
+                          handleDeleteBlog(searchBlogItem.id, searchBlogItem.image)
+                        }
+                        blogItem={searchBlogItem}
+                      />
                     </div>
                   ))
                 ) : (

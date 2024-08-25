@@ -4,7 +4,7 @@ import { Blog } from '@/utils/types';
 import { FC, useEffect } from 'react';
 import SingleBlog from './single-blog';
 import { useRouter } from 'next/navigation';
-import { deleteImageFromFirebase } from '@/utils/helpers';
+import { handleDeleteBlogPost } from '@/utils/helpers';
 
 // Interface definující props komponenty BlogList
 interface BlogListProps {
@@ -20,30 +20,16 @@ const BlogList: FC<BlogListProps> = ({ lists }) => {
   const router = useRouter();
 
   /**
-   * Funkce pro odstranění blogového příspěvku a jeho obrázku.
-   * Nejprve odstraní obrázek z Firebase Storage pomocí jeho URL, poté odešle požadavek
-   * na server pro smazání příspěvku s daným ID. Po úspěšném odstranění příspěvku obnoví
-   * stránku, aby se aktualizoval seznam příspěvků.
-   *
+   * Asynchronní funkce pro odstranění blogového příspěvku a jeho obrázku.
+   * Funkce nejprve volá pomocnou funkci handleDeleteBlogPost, která odstraní obrázek z Firebase
+   * na základě jeho URL a poté odešle požadavek ke smazání příspěvku z databáze podle ID.
    */
   const handleDeleteBlog = async (id: number, imageUrl: string) => {
-    try {
-      // Odstraní obrázek z Firebase Storage
-      await deleteImageFromFirebase(imageUrl);
+    // Volá pomocnou funkci ke smazání příspěvku a přidruženého obrázku
+    const success = await handleDeleteBlogPost(id, imageUrl);
 
-      // Odešle požadavek na smazání příspěvku
-      const res = await fetch(`/api/blog-post/delete-post?id=${id}`, {
-        method: 'DELETE',
-        cache: 'no-store',
-      });
-
-      const data = await res.json();
-
-      // Pokud je smazání úspěšné, obnoví stránku
-      if (data && data.success) router.refresh();
-    } catch (error) {
-      console.error('Error deleting blog post or image:', error);
-    }
+    // Pokud je operace úspěšná, stránka se obnoví, aby zobrazila aktuální data
+    if (success) router.refresh();
   };
 
   // Obnovení stránky (refresh) při načtení komponenty pro zajištění aktuálnosti dat

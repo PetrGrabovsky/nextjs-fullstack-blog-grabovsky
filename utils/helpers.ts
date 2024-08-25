@@ -41,7 +41,7 @@ export const handleImageSaveToFirebase = async (file: File): Promise<string> => 
  * Tato funkce příjmá URL obrázku, extrahuje z něj cestu k souboru ve Firebase Storage
  * a náslědně tento obrázek odstraní.
  */
-export const deleteImageFromFirebase = async (imageUrl: string): Promise<void> => {
+const deleteImageFromFirebase = async (imageUrl: string): Promise<void> => {
   try {
     // Extrahování cesty k souboru z URL
     const storagePath = imageUrl.split('/o/')[1].split('?')[0];
@@ -57,5 +57,33 @@ export const deleteImageFromFirebase = async (imageUrl: string): Promise<void> =
     console.error('Error deleting image from Firebase:', error);
 
     throw new Error('Failed to delete image');
+  }
+};
+
+/**
+ * Funkce pro odstranění blogového příspěvku a přidruženého obrázku.
+ * Nejprve odstraní obrázek z Firebase Storage pomocí jeho URL, poté odešle požadavek na server
+ * pro smazání příspěvku s daným ID
+ */
+export const handleDeleteBlogPost = async (id: number, imageUrl: string): Promise<boolean> => {
+  try {
+    // Odstraní obrázek z Firebase Storage
+    await deleteImageFromFirebase(imageUrl);
+
+    // Odešle požadavek na smazání příspěvku
+    const res = await fetch(`/api/blog-post/delete-post?id=${id}`, {
+      method: 'DELETE',
+      cache: 'no-store',
+    });
+
+    const data = await res.json();
+
+    // Pokud je odstranění úspěšné vrátí true
+    return data && data.success;
+  } catch (error) {
+    console.error('Error deleting blog post or image:', error);
+
+    // Pokud není odstranění úspěšné vrátí false
+    return false;
   }
 };
