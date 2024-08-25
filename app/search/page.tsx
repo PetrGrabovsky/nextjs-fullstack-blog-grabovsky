@@ -38,11 +38,22 @@ const Search: FC = () => {
   };
 
   /**
+   * Pomocná funkce pro normalizaci vyhledávacího dotazu.
+   * Odstraní nadbytečné mezery a převede dotaz na malá písmena.
+   */
+  const normalizeSearchQuery = (query: string) => {
+    return query.trim().toLowerCase();
+  };
+
+  /**
    * Pomocná funkce pro načtení výsledků vyhledávání na základě dotazu.
    * Odesílá GET požadavek na server a aktualizuje stav searchResults s novými daty.
+   * Dotaz je před odesláním normalizován, aby bylo vyhledávání konzistentní
    */
   const helperFunctionToFetchSearchResult = async (query: string) => {
-    const res = await fetch(`/api/search?query=${query}`, {
+    const normalizedQuerry = normalizeSearchQuery(query);
+
+    const res = await fetch(`/api/search?query=${normalizedQuerry}`, {
       method: 'GET',
       cache: 'no-store', // Zajištění, že se výsledky načítají vždy aktualní
     });
