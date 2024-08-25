@@ -11,24 +11,27 @@ export const GET = async (req: NextRequest) => {
     // Vytvoření instance URL pro snadnou manipulaci s parametry URL
     const url = new URL(req.url);
 
-    // Extrakce vyhledávacího dotazu z parametrů URL
-    const extractQuery = url.searchParams.get('query');
+    // Extrakce vyhledávacího dotazu z parametrů URL a jeho normalizace
+    const extractQuery =
+      url.searchParams.get('query')?.toLowerCase().trim().replace(/\s+/g, ' ') || '';
 
     /**
-     * Vyhledání blogových příspěvků v databázi na základě titulku nebo popisu, které obsahují
-     * vyhledávací dotaz
+     * Vyhledání blogových příspěvků v databázi na základě normalizovaného titulku nebo popisu,
+     * které obsahují vyhledávací dotaz
      */
     const searchPostList = await prisma.post.findMany({
       where: {
         OR: [
           {
             title: {
-              contains: extractQuery || '', // Vyhledávání v titulcích
+              contains: extractQuery, // Vyhledávání v normalizovaných titulcích
+              mode: 'insensitive', // Ignoruje rozdíl mezi velkýmí a malými písmeny
             },
           },
           {
             description: {
-              contains: extractQuery || '', // Vyhledávání v popisech (obsahu)
+              contains: extractQuery, // Vyhledávání v normalizovaných popisech (obsahu)
+              mode: 'insensitive', // Ignoruje rozdíl mezi velkými a malými písmeny
             },
           },
         ],
