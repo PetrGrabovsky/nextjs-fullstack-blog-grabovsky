@@ -4,6 +4,7 @@ import { Blog } from '@/utils/types';
 import { FC, useEffect } from 'react';
 import SingleBlog from './single-blog';
 import { useRouter } from 'next/navigation';
+import { deleteImageFromFirebase } from '@/utils/helpers';
 
 // Interface definující props komponenty BlogList
 interface BlogListProps {
@@ -19,21 +20,30 @@ const BlogList: FC<BlogListProps> = ({ lists }) => {
   const router = useRouter();
 
   /**
-   * Funkce pro odstranění blogového příspěvku.
-   * Odesílá požadavek na server pro smazání příspěvku s daným ID.
-   * Po úspěšném odstranění příspěvku obnoví stránku, aby se aktualizoval seznam příspěvků.
+   * Funkce pro odstranění blogového příspěvku a jeho obrázku.
+   * Nejprve odstraní obrázek z Firebase Storage pomocí jeho URL, poté odešle požadavek
+   * na server pro smazání příspěvku s daným ID. Po úspěšném odstranění příspěvku obnoví
+   * stránku, aby se aktualizoval seznam příspěvků.
    *
    */
-  const handleDeleteBlog = async (id: number) => {
-    const res = await fetch(`/api/blog-post/delete-post?id=${id}`, {
-      method: 'DELETE',
-      cache: 'no-store',
-    });
+  const handleDeleteBlog = async (id: number, imageUrl: string) => {
+    try {
+      // Odstraní obrázek z Firebase Storage
+      await deleteImageFromFirebase(imageUrl);
 
-    const data = await res.json();
+      // Odešle požadavek na smazání příspěvku
+      const res = await fetch(`/api/blog-post/delete-post?id=${id}`, {
+        method: 'DELETE',
+        cache: 'no-store',
+      });
 
-    // Pokud je smazání úspěšné, obnoví stránku
-    if (data && data.success) router.refresh();
+      const data = await res.json();
+
+      // Pokud je smazání úspěšné, obnoví stránku
+      if (data && data.success) router.refresh();
+    } catch (error) {
+      console.error('Error deleting blog post or image:', error);
+    }
   };
 
   // Obnovení stránky (refresh) při načtení komponenty pro zajištění aktuálnosti dat
@@ -50,7 +60,10 @@ const BlogList: FC<BlogListProps> = ({ lists }) => {
             lists.map((listItem: Blog) => (
               <div key={listItem.id} className="px-4">
                 {/* Každý příspěvek zobrazen pomocí komponenty SingleBlog */}
-                <SingleBlog handleDeleteBlog={handleDeleteBlog} blogItem={listItem} />
+                <SingleBlog
+                  handleDeleteBlog={() => handleDeleteBlog(listItem.id, listItem.image)}
+                  blogItem={listItem}
+                />
               </div>
             ))}
         </div>
