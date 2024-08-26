@@ -41,7 +41,7 @@ const BlogList: FC<BlogListProps> = ({ lists }) => {
     <section className="pb-[120px] pt-[120px]">
       <div className="container">
         {/* Mřížka pro zobrazení seznamu blogových příspěvků */}
-        <div className="-mx-4 grid grid-cols-3 gap-2">
+        <div className="-mx-4 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
           {lists?.length &&
             lists.map((listItem: Blog) => (
               <div key={listItem.id} className="px-4">
