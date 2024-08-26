@@ -44,7 +44,7 @@ const Header: FC = () => {
   // Funkce pro přihlášení/odhlášení uživatele
   const handleLoginButtonClick = () => {
     if (session) signOut();
-    else signIn('github');
+    else signIn('google');
     setNavbarOpen(false); // Zavře mobilní menu po kliknutí
   };
 
