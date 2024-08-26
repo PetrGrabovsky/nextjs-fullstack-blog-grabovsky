@@ -140,10 +140,19 @@ const Header: FC = () => {
                         </Link>
                       </li>
                     ))}
+                    {/* Zobrazí tlačítka Create a Login pouze na malých obrazovkách */}
+                    <li className="mt-4 md:hidden">
+                      {session && <Button onClick={handleCreateButtonClick} text="Create" />}
+                      <Button
+                        onClick={handleLoginButtonClick}
+                        text={session ? 'Logout' : 'Login'}
+                      />
+                    </li>
                   </ul>
                 </nav>
               </div>
-              <div className="flex items-center justify-end gap-4 pr-16 lg:pr-0">
+              {/* Tlačítka Create a Login zobrazené pouze na větších obrazovkách */}
+              <div className="hidden items-center justify-end gap-4 pr-16 md:flex lg:pr-0">
                 {/* Zobrazí tlačítko Create pouze po přihlášení */}
                 {session && <Button onClick={handleCreateButtonClick} text="Create" />}
                 {/* Tlačítko pro přihlášení */}
