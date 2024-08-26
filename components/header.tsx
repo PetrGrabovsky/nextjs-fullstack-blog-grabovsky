@@ -45,11 +45,13 @@ const Header: FC = () => {
   const handleLoginButtonClick = () => {
     if (session) signOut();
     else signIn('github');
+    setNavbarOpen(false); // Zavře mobilní menu po kliknutí
   };
 
   // Funkce pro navigaci na stránku vytvoření nového blogu
   const handleCreateButtonClick = () => {
     router.push('/create');
+    setNavbarOpen(false); // Zavře mobilní menu po kliknutí
   };
 
   useEffect(() => {
@@ -85,6 +87,7 @@ const Header: FC = () => {
               {/* Odkaz na domovskou stránku ve formě loga */}
               <Link
                 href={'/'}
+                onClick={() => setNavbarOpen(false)} // Zavře mobilní menu po kliknutí
                 className={clsx(
                   sticky ? 'py-5 lg:py-2' : 'py-8', // Podmíněné přidání tříd pro sticky stav
                   'block w-full cursor-pointer text-[30px] font-extrabold' // Společné pro oba stavy
@@ -131,6 +134,7 @@ const Header: FC = () => {
                       <li key={menuItem.id} className="group relative">
                         <Link
                           href={menuItem.path}
+                          onClick={() => setNavbarOpen(false)} // Zavře mobilní menu po kliknutí
                           className={clsx(
                             'flex py-2 text-base text-dark group-hover:opacity-70',
                             'dark:text-white lg:mr-0 lg:inline-flex lg:px-0 lg:py-6'
