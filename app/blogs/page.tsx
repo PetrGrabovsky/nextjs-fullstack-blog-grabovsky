@@ -6,7 +6,13 @@ const extractAllBlogs = async () => {
   // Odeslání GET požadavku na API pro získání všech blogových příspěvků
   const res = await fetch(`${process.env.URL}/api/blog-post/get-all-posts`, {
     method: 'GET',
-    cache: 'no-store', // Zajištění, že se data vždy načtou z API a ne z cache
+    next: {
+      /**
+       * Tato konfigurace zajišťuje, že žádná data nebudou uchovávána v cache a vždy se
+       * získají nejaktuálnější data z API.
+       */
+      revalidate: 0,
+    },
   });
 
   const data = await res.json();

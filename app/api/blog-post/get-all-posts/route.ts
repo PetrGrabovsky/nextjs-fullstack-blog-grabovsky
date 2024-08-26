@@ -1,15 +1,22 @@
 import prisma from '@/database/prisma';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 
 /**
  * Handler pro HTTP GET požadavek pro získání všech blogových příspěvků.
  * Funkce komunikuje s databází pomocí Prisma klienta, aby načetla všechy dostupné blogové
  * příspěvky, a následně je vrací jako JSON odpověď
  */
-export const GET = async () => {
+export const GET = async (request: NextRequest) => {
   try {
     // Načtení všech blogových příspěvků z databáze pomocí Prisma klienta
     const getAllBlogPosts = await prisma.post.findMany();
+
+    // Získání cesty z parametrů URL, nebo výchozí hodnota
+    const path = request.nextUrl.pathname || '/';
+
+    // Revalidace cesty pro zajištění zobrazení nejaktuálnějšího obsahu
+    revalidatePath(path);
 
     // Pokud jsou příspěvky úspěšně načteny a existují, vrátí se odpověď o úspěchu
     if (getAllBlogPosts && getAllBlogPosts.length) {
