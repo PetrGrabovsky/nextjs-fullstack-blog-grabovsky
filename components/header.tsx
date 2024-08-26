@@ -142,10 +142,13 @@ const Header: FC = () => {
                     ))}
                     {/* Zobrazí tlačítka Create a Login pouze na malých obrazovkách */}
                     <li className="mt-4 md:hidden">
-                      {session && <Button onClick={handleCreateButtonClick} text="Create" />}
+                      {session && (
+                        <Button onClick={handleCreateButtonClick} text="Create" className="mb-1" />
+                      )}
                       <Button
                         onClick={handleLoginButtonClick}
                         text={session ? 'Logout' : 'Login'}
+                        className="mt-1"
                       />
                     </li>
                   </ul>
