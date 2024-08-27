@@ -1,24 +1,6 @@
 import BlogDetailsHome from '@/components/blog-details-home';
 import { FC } from 'react';
-
-/**
- * Asynchronní funkce extractBlockDetails pro získání detailů blogového příspěvku.
- * Tato funkce odesílá GET požadavek na API, které vrací detaily příspěvku na základě jeho ID.
- * Data jsou vrácena, pokud je požadavek úspěšný.
- */
-const extractBlogDetails = async (id: string) => {
-  const res = await fetch(`${process.env.URL}/api/blog-post/blog-details?blogID=${id}`, {
-    method: 'GET',
-    // Konfigurace pro okamžitou invalidaci cache a zajištění, že se vždy načtou aktuální data
-    next: {
-      revalidate: 0,
-    },
-  });
-
-  const data = await res.json(); // Parsování odpovědi z API do JSON formátu
-
-  if (data.success) return data.data; // Pokud je požadavek úspěšný,vrací se data příspěvku
-};
+import { extractBlogDetails } from '@/utils/helpers';
 
 /**
  * Typový interface pro props komponenty BlogDetails.
