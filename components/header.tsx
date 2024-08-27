@@ -128,6 +128,10 @@ const Header: FC = () => {
                     'lg:!bg-transparent lg:p-0 lg:opacity-100'
                   )}
                 >
+                  {/* Přidání ThemeToggler na malé obrazovky */}
+                  <div className="absolute right-6 top-6 z-50 lg:hidden">
+                    <ThemeToggler />
+                  </div>
                   <ul className="block lg:flex lg:space-x-12">
                     {/* Dynamické generování položek menu */}
                     {menuItems.map((menuItem: MenuItem) => (
@@ -145,7 +149,7 @@ const Header: FC = () => {
                       </li>
                     ))}
                     {/* Zobrazí tlačítka Create a Login pouze na malých obrazovkách */}
-                    <li className="mt-4 md:hidden">
+                    <li className="mt-4 lg:hidden">
                       {session && (
                         <Button onClick={handleCreateButtonClick} text="Create" className="mb-1" />
                       )}
@@ -159,7 +163,7 @@ const Header: FC = () => {
                 </nav>
               </div>
               {/* Tlačítka Create a Login zobrazené pouze na větších obrazovkách */}
-              <div className="hidden items-center justify-end gap-4 pr-16 md:flex lg:pr-0">
+              <div className="hidden items-center justify-end gap-4 pr-16 lg:flex lg:pr-0">
                 {/* Zobrazí tlačítko Create pouze po přihlášení */}
                 {session && <Button onClick={handleCreateButtonClick} text="Create" />}
                 {/* Tlačítko pro přihlášení */}
