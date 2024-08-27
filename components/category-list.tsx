@@ -44,6 +44,14 @@ const CategoryList: FC<CategoryListProps> = ({ list }) => {
   // Obsluha kliknutí na tlačítko pro vytvoření nového příspěvku - přesměrování na Create stránku.
   const handleCreateButtonClick = () => router.push('/create');
 
+  // Funkce pro zkrácení textu popisu na maximálně 200 znaků
+  const truncateDescription = (description: string, maxLength: number) => {
+    if (description.length > maxLength) {
+      return description.slice(0, maxLength) + '...';
+    }
+    return description;
+  };
+
   return (
     // Hlavní sekce komponenty
     <section className="overflow-hidden pb-[120px] pt-[180px]">
@@ -85,7 +93,9 @@ const CategoryList: FC<CategoryListProps> = ({ list }) => {
                   </div>
                 </div>
                 {/* Popis (obsah) nejnovějšího příspěvku */}
-                <p className={paragraphClasses}>{getLatestBlogForCurrentCategory?.description}</p>
+                <p className={paragraphClasses}>
+                  {truncateDescription(getLatestBlogForCurrentCategory?.description || '', 200)}
+                </p>
               </div>
             )}
           </div>
