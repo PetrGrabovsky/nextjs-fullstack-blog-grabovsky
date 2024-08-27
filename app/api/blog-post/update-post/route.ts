@@ -13,6 +13,18 @@ export const PUT = async (request: NextRequest) => {
     // Extrakce JSON dat z požadavku
     const extractData = await request.json();
 
+    // Validace posledního přidaného komentáře
+    const newComment = extractData.comments[extractData.comments.length - 1];
+    const commentText = newComment.split('|')[0];
+
+    // Kontrola, zda má nový komentář alespoň 3 neprázdné znaky
+    if (commentText.trim().length < 3) {
+      return NextResponse.json({
+        success: false,
+        message: 'Comment must be at least 3 characters long.', // Zpráva pro neplatný komentář
+      });
+    }
+
     // Aktualizace příspěvku v databázi na základě ID a nových komentářů
     const updatedBlogPost = await prisma.post.update({
       where: {

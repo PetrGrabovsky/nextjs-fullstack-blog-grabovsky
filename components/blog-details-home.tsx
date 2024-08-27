@@ -41,6 +41,10 @@ const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData }) => {
    * Uloží nový komentář ke konkrétnímu příspěvku prostřednictvím API požadavku.
    */
   const handleCommentSave = async () => {
+    if (comment.trim().length < 3) {
+      return; // Zastaví odeslání, pokud validace neprojde
+    }
+
     // Přidání nového komentáře do seznamu stávajících komentářů
     const extractComments = [...blogData.comments];
     extractComments.push(`${comment}|${session?.user?.name}`);
