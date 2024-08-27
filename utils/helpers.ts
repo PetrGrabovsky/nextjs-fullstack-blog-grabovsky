@@ -114,3 +114,23 @@ export const extractBlogDetails = async (id: string) => {
 
   if (data.success) return data.data; // Pokud je požadavek úspěšný,vrací se data příspěvku
 };
+
+// Funkce pro získání všech blogových příspěvků pomocí API
+export const extractAllBlogs = async () => {
+  // Odeslání GET požadavku na API pro získání všech blogových příspěvků
+  const res = await fetch(`${process.env.URL}/api/blog-post/get-all-posts`, {
+    method: 'GET',
+    next: {
+      /**
+       * Tato konfigurace zajišťuje, že žádná data nebudou uchovávána v cache a vždy se
+       * získají nejaktuálnější data z API.
+       */
+      revalidate: 0,
+    },
+  });
+
+  const data = await res.json();
+
+  // Pokud je odpověď úspěšná vrátí získaná data
+  if (data.success) return data.data;
+};
