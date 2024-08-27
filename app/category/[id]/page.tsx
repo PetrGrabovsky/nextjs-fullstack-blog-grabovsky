@@ -1,22 +1,6 @@
 import CategoryList from '@/components/category-list';
 import { FC } from 'react';
-
-/**
- * Funkce pro načtení příspěvků na základě ID kategorie.
- * Odesílá GET požadavek na API endpoint s připojeným ID kategorie jako parametrem.
- */
-const getAllListsByCategory = async (getId: string) => {
-  const res = await fetch(`${process.env.URL}/api/category?categoryID=${getId}`, {
-    method: 'GET',
-    cache: 'no-store', // Zajištění, že se vždy načítají aktuální data z API
-  });
-
-  // Parsování odpovědi z API do JSON formátu
-  const data = await res.json();
-
-  // Pokud je požadavek úspěšný, vrátí načtená data (blogové příspěvky)
-  if (data.success) return data.data;
-};
+import { getAllListsByCategory } from '@/utils/helpers';
 
 // Definice typu props pro komponentu Category, která obsahuje ID kategorie
 interface CategoryProps {

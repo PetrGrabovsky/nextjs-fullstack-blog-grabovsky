@@ -134,3 +134,20 @@ export const extractAllBlogs = async () => {
   // Pokud je odpověď úspěšná vrátí získaná data
   if (data.success) return data.data;
 };
+
+/**
+ * Funkce pro načtení příspěvků na základě ID kategorie.
+ * Odesílá GET požadavek na API endpoint s připojeným ID kategorie jako parametrem.
+ */
+export const getAllListsByCategory = async (getId: string) => {
+  const res = await fetch(`${process.env.URL}/api/category?categoryID=${getId}`, {
+    method: 'GET',
+    cache: 'no-store', // Zajištění, že se vždy načítají aktuální data z API
+  });
+
+  // Parsování odpovědi z API do JSON formátu
+  const data = await res.json();
+
+  // Pokud je požadavek úspěšný, vrátí načtená data (blogové příspěvky)
+  if (data.success) return data.data;
+};
