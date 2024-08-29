@@ -2,7 +2,7 @@
 
 import { headingH2Classes, paragraphClasses } from '@/utils/styles';
 import { Blog } from '@/utils/types';
-import { ChangeEvent, FC, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, FC, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -30,8 +30,6 @@ const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData }) => {
   const [comment, setComment] = useState<string>('');
   // Použití useSession pro získání informací o aktualní session kvůli identifikaci uživatele
   const { data: session } = useSession();
-  // Použití useRef k získání přístupu k inputu pro komentáře (kvůli nastavení focusu)
-  const commentInputRef = useRef<HTMLInputElement>(null);
   // Hook useRouter pro možnost navigace a obnovení stránky (refresh)
   const router = useRouter();
 
@@ -78,11 +76,6 @@ const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData }) => {
   const handleCommentChange = (event: ChangeEvent<HTMLInputElement>) => {
     setComment(event.target.value);
   };
-
-  useEffect(() => {
-    // Nastavení focusu na input po vykreslení komponenty
-    if (commentInputRef.current) commentInputRef.current.focus();
-  }, []);
 
   /**
    * Použití useEffect pro automatickou aktualizaci stránky každé 2 sekundy.
@@ -174,7 +167,6 @@ const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData }) => {
                 <input
                   name="comment"
                   id="comment"
-                  ref={commentInputRef} // Použití ref umožňuje přímý přístup k DOM elementu
                   autoComplete="off"
                   placeholder="Add comment here"
                   value={comment}
