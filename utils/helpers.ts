@@ -151,3 +151,11 @@ export const getAllListsByCategory = async (getId: string) => {
   // Pokud je požadavek úspěšný, vrátí načtená data (blogové příspěvky)
   if (data.success) return data.data;
 };
+
+// Funkce pro zkrácení textu popisu na maximálně 200 znaků
+export const truncateDescription = (description: string, maxLength: number) => {
+  if (description.length > maxLength) {
+    return description.slice(0, maxLength) + '...';
+  }
+  return description;
+};

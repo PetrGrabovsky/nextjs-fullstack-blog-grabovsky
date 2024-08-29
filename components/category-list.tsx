@@ -9,6 +9,7 @@ import { headingH2Classes, headingH3Classes, paragraphClasses } from '@/utils/st
 import Image from 'next/image';
 import { categories } from '@/utils/data-mappings';
 import Link from 'next/link';
+import { truncateDescription } from '@/utils/helpers';
 
 /**
  * Typový interface pro props komponenty CategoryList.
@@ -43,14 +44,6 @@ const CategoryList: FC<CategoryListProps> = ({ list }) => {
 
   // Obsluha kliknutí na tlačítko pro vytvoření nového příspěvku - přesměrování na Create stránku.
   const handleCreateButtonClick = () => router.push('/create');
-
-  // Funkce pro zkrácení textu popisu na maximálně 200 znaků
-  const truncateDescription = (description: string, maxLength: number) => {
-    if (description.length > maxLength) {
-      return description.slice(0, maxLength) + '...';
-    }
-    return description;
-  };
 
   return (
     // Hlavní sekce komponenty
