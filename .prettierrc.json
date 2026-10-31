@@ -5,6 +5,8 @@
   "printWidth": 100,
   "trailingComma": "es5",
   "bracketSpacing": true,
-  "jsxBracketSameLine": false,
-  "plugins": ["prettier-plugin-tailwindcss"]
+  "bracketSameLine": false,
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindStylesheet": "./app/globals.css",
+  "tailwindFunctions": ["clsx"]
 }

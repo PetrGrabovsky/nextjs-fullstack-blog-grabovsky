@@ -24,3 +24,6 @@ coverage
 
 # Ignorování specifických dočasných souborů
 .temp
+
+# Ignorování generovaného Prisma klienta
+generated
