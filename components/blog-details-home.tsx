@@ -4,34 +4,29 @@ import Link from 'next/link';
 import { HiArrowLeft } from 'react-icons/hi';
 import { BlogWithComments } from '@/utils/types';
 import { formatDate, getCategoryLabel } from '@/utils/helpers';
-import {
-  buttonClasses,
-  categoryBadgeClasses,
-  mutedTextClasses,
-  sectionTitleClasses,
-} from '@/utils/styles';
+import { categoryBadgeClasses, mutedTextClasses, sectionTitleClasses } from '@/utils/styles';
 import Avatar from './avatar';
-import CommentForm from './comment-form';
+import CommentComposer from './comment-composer';
 import DeleteCommentButton from './delete-comment-button';
 import DeletePostButton from './delete-post-button';
+import OwnerOnly from './owner-only';
 import PostMeta from './post-meta';
 
 /**
  * Typový interface pro props komponenty BlogDetailsHome.
- * Komponenta přijímá příspěvek včetně komentářů a ID přihlášeného uživatele.
+ * Komponenta přijímá příspěvek včetně komentářů.
  */
 interface BlogDetailsHomeProps {
   blogData: BlogWithComments; // Objekt reprezentující blogový příspěvek
-  currentUserId?: string; // ID přihlášeného uživatele, pokud je přihlášen
 }
 
 /**
  * Komponenta BlogDetailsHome.
  * Zobrazuje celý blogový příspěvek (titulek, autora, obrázek, obsah) a diskuzi pod ním.
+ * Obsah je cachovaný a předrenderovaný, části závislé na přihlášeném uživateli
+ * (formulář komentáře, tlačítka pro smazání) se načítají v <Suspense>.
  */
-const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData, currentUserId }) => {
-  const isPostAuthor = blogData.authorId === currentUserId;
-
+const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData }) => {
   return (
     <div className="container py-12 sm:py-16">
       <article className="mx-auto max-w-3xl">
@@ -63,7 +58,9 @@ const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData, currentUserId }) 
               <p className={mutedTextClasses}>Author</p>
             </div>
           </div>
-          {isPostAuthor && <DeletePostButton postId={blogData.id} redirectToList />}
+          <OwnerOnly ownerIds={[blogData.authorId]}>
+            <DeletePostButton postId={blogData.id} redirectToList />
+          </OwnerOnly>
         </div>
         {/* Obrázek příspěvku */}
         <div className="relative mt-10 aspect-video overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800">
@@ -91,16 +88,7 @@ const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData, currentUserId }) 
           </h2>
           {/* Formulář pro přidání komentáře, nebo výzva k přihlášení */}
           <div className="mt-6">
-            {currentUserId ? (
-              <CommentForm postId={blogData.id} />
-            ) : (
-              <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-zinc-50 p-6 dark:bg-zinc-900">
-                <p className="text-zinc-600 dark:text-zinc-400">Log in to join the discussion.</p>
-                <Link href={`/login?callbackUrl=/blogs/${blogData.id}`} className={buttonClasses}>
-                  Login
-                </Link>
-              </div>
-            )}
+            <CommentComposer postId={blogData.id} />
           </div>
           {/* Seznam komentářů */}
           <ul className="mt-8 space-y-6">
@@ -125,9 +113,9 @@ const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData, currentUserId }) 
                       </time>
                     </p>
                     {/* Smazání komentáře pro autora komentáře a autora příspěvku */}
-                    {(comment.authorId === currentUserId || isPostAuthor) && (
+                    <OwnerOnly ownerIds={[comment.authorId, blogData.authorId]}>
                       <DeleteCommentButton commentId={comment.id} />
-                    )}
+                    </OwnerOnly>
                   </div>
                   <p className="mt-1 whitespace-pre-line text-zinc-700 dark:text-zinc-300">
                     {comment.text}

@@ -15,6 +15,9 @@ interface CategoryProps {
   params: Promise<{ id: string }>;
 }
 
+// Předrenderování stránek všech kategorií při buildu
+export const generateStaticParams = () => categories.map(({ value }) => ({ id: value }));
+
 // Metadata stránky podle názvu kategorie, neznámá kategorie vede na stránku 404
 export const generateMetadata = async ({ params }: CategoryProps): Promise<Metadata> => {
   const { id } = await params;

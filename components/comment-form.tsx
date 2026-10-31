@@ -30,7 +30,8 @@ const CommentForm: FC<CommentFormProps> = ({ postId }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    // action zajistí odeslání i před načtením JavaScriptu, poté formulář obsluhuje onSubmit
+    <form action={formAction} onSubmit={handleSubmit}>
       <label htmlFor="comment" className="sr-only">
         Comment
       </label>

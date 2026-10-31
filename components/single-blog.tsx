@@ -6,12 +6,12 @@ import { categoryBadgeClasses } from '@/utils/styles';
 import { getCategoryLabel, truncateDescription } from '@/utils/helpers';
 import Avatar from './avatar';
 import DeletePostButton from './delete-post-button';
+import OwnerOnly from './owner-only';
 import PostMeta from './post-meta';
 
 // Interface definující props komponenty SingleBlog
 interface SingleBlogProps {
   blogItem: Blog; // Objekt reprezentující jednotlivý blogový příspěvek
-  canDelete: boolean; // Příznak, zda je přihlášený uživatel autorem příspěvku
   priority?: boolean; // Přednostní načtení obrázku (karty viditelné hned po načtení stránky)
 }
 
@@ -21,8 +21,9 @@ interface SingleBlogProps {
  * Celá karta je klikatelná (odkaz přes titulek roztažený na celou kartu), tlačítko pro
  * smazání se zobrazuje pouze autorovi příspěvku.
  */
-const SingleBlog: FC<SingleBlogProps> = ({ blogItem, canDelete, priority = false }) => {
-  const { id, image, category, title, description, authorName, authorImage, createdAt } = blogItem;
+const SingleBlog: FC<SingleBlogProps> = ({ blogItem, priority = false }) => {
+  const { id, image, category, title, description, authorId, authorName, authorImage, createdAt } =
+    blogItem;
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-900/50 dark:hover:shadow-black/30">
@@ -63,7 +64,9 @@ const SingleBlog: FC<SingleBlogProps> = ({ blogItem, canDelete, priority = false
             </span>
           </div>
           {/* Tlačítko leží nad roztaženým odkazem, aby šlo kliknout */}
-          {canDelete && <DeletePostButton postId={id} className="relative z-10" />}
+          <OwnerOnly ownerIds={[authorId]}>
+            <DeletePostButton postId={id} className="relative z-10" />
+          </OwnerOnly>
         </div>
       </div>
     </article>

@@ -52,7 +52,8 @@ const CreatePostForm: FC = () => {
   const imageMessage = imageError ?? (preview ? undefined : state.errors?.image);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8" noValidate>
+    // action zajistí odeslání i před načtením JavaScriptu, poté formulář obsluhuje onSubmit
+    <form action={formAction} onSubmit={handleSubmit} className="space-y-8" noValidate>
       {/* Výběr obrázku s náhledem */}
       <div>
         <span className={labelClasses}>Cover image</span>

@@ -1,12 +1,12 @@
 'use server';
 
 import { del, put } from '@vercel/blob';
-import { revalidatePath } from 'next/cache';
+import { updateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { signOut } from '@/auth';
 import prisma from '@/database/prisma';
-import { getSession } from '@/database/queries';
+import { POSTS_TAG, getSession, postTag } from '@/database/queries';
 import { IMAGE_TYPES, commentSchema, idSchema, postSchema } from './validation';
 import { ActionResult, CommentFormState, PostFormState } from './types';
 
@@ -104,7 +104,7 @@ export const createPost = async (
     return { values, message: GENERIC_ERROR };
   }
 
-  revalidatePath('/', 'layout');
+  updateTag(POSTS_TAG);
   redirect(`/blogs/${postId}`);
 };
 
@@ -137,7 +137,7 @@ export const deletePost = async (postId: number, redirectToList = false): Promis
     return { success: false, message: GENERIC_ERROR };
   }
 
-  revalidatePath('/', 'layout');
+  updateTag(POSTS_TAG);
   if (redirectToList) redirect('/blogs');
   return { success: true };
 };
@@ -173,7 +173,7 @@ export const addComment = async (
     return { error: GENERIC_ERROR };
   }
 
-  revalidatePath(`/blogs/${id.data}`);
+  updateTag(postTag(id.data));
   return { submissionId: crypto.randomUUID() };
 };
 
@@ -199,7 +199,7 @@ export const deleteComment = async (commentId: number): Promise<ActionResult> =>
     });
     if (!comment || !count) return { success: false, message: 'Comment not found or not allowed.' };
 
-    revalidatePath(`/blogs/${comment.postId}`);
+    updateTag(postTag(comment.postId));
     return { success: true };
   } catch (error) {
     console.error('Failed to delete comment:', error);

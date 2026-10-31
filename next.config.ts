@@ -2,6 +2,10 @@ import type { NextConfig } from 'next';
 
 // Konfigurace pro Next.js aplikaci
 const nextConfig: NextConfig = {
+  // Cache Components: stránky se předrenderují a data se cachují přes 'use cache',
+  // části závislé na požadavku (session, query parametry) se streamují v <Suspense>
+  cacheComponents: true,
+  partialPrefetching: true,
   images: {
     // Definice povolených vzdálených zdrojů obrázků
     remotePatterns: [
