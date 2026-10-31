@@ -10,15 +10,7 @@ declare module 'next-auth' {
 
 // Typy modelů z databáze
 export type Blog = Post;
-export type BlogComment = Comment;
 export type BlogWithComments = Post & { comments: Comment[] };
-
-// Přihlášený uživatel předávaný do klientských komponent
-export interface CurrentUser {
-  id: string;
-  name?: string | null;
-  image?: string | null;
-}
 
 // Rozhraní pro položky menu
 export interface MenuItem {
@@ -33,21 +25,29 @@ export interface CategoryOption {
   value: string; // Hodnota, která bude použita pro logiku
 }
 
-// Rozhraní pro položky formuláře, které definují jednotlivé prvky formuláře
-export interface FormControlItem {
-  id: keyof BlogFormValues; // Unikátní identifikátor, odpovídá názvu pole formuláře
-  label: string; // Popis položky formuláře
-  placeholder: string; // Placeholder
-  type: string; // Typ vstupu (např. text, email, password...)
-  component: 'input' | 'textarea' | 'select'; // Použitá komponenta
-  options: CategoryOption[]; // Seznam možností, pokud je položka komponenta select
-}
-
 // Hodnoty textových polí formuláře pro vytvoření příspěvku
 export interface BlogFormValues {
   title: string; // Název příspěvku
   description: string; // Obsah příspěvku
   category: string; // Kategorie příspěvku
+}
+
+// Společné vlastnosti položek formuláře pro vytvoření příspěvku
+interface FormControlBase {
+  id: keyof BlogFormValues; // Identifikátor, odpovídá názvu pole formuláře
+  label: string; // Popis položky formuláře
+  placeholder: string; // Placeholder
+}
+
+// Položka formuláře: textové pole, víceřádkové pole, nebo výběr z možností
+export type FormControlItem =
+  | (FormControlBase & { component: 'input' | 'textarea' })
+  | (FormControlBase & { component: 'select'; options: CategoryOption[] });
+
+// Výsledek server action bez návratových dat
+export interface ActionResult {
+  success: boolean; // Příznak úspěchu operace
+  message?: string; // Chybová zpráva při neúspěchu
 }
 
 // Stav formuláře pro vytvoření příspěvku vrácený ze server action
@@ -60,5 +60,5 @@ export interface PostFormState {
 // Stav formuláře pro přidání komentáře vrácený ze server action
 export interface CommentFormState {
   error?: string; // Chybová zpráva
-  success?: boolean; // Příznak úspěšného uložení
+  submissionId?: string; // Unikátní ID úspěšného odeslání (slouží k vyprázdnění formuláře)
 }

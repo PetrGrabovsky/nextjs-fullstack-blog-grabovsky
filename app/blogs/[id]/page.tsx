@@ -1,27 +1,22 @@
 import type { Metadata } from 'next';
 import { FC } from 'react';
 import { notFound } from 'next/navigation';
-import { auth } from '@/auth';
 import BlogDetailsHome from '@/components/blog-details-home';
-import { getPostById } from '@/database/queries';
+import { getPostById, getSession } from '@/database/queries';
 import { truncateDescription } from '@/utils/helpers';
+import { idSchema } from '@/utils/validation';
 
-/**
- * Typový interface pro props stránky BlogDetails.
- * V Next.js 15+ jsou parametry cesty asynchronní (Promise).
- */
+// Props stránky BlogDetails, parametry cesty jsou asynchronní (Promise)
 interface BlogDetailsProps {
   params: Promise<{ id: string }>;
 }
 
 // Načtení příspěvku podle ID z URL, neplatné nebo neexistující ID vede na stránku 404
 const loadPost = async (params: BlogDetailsProps['params']) => {
-  const { id } = await params;
-  const postId = Number(id);
+  const id = idSchema.safeParse(Number((await params).id));
+  if (!id.success) notFound();
 
-  if (!Number.isInteger(postId) || postId <= 0) notFound();
-
-  const post = await getPostById(postId);
+  const post = await getPostById(id.data);
   if (!post) notFound();
 
   return post;
@@ -30,11 +25,12 @@ const loadPost = async (params: BlogDetailsProps['params']) => {
 // Metadata stránky podle titulku a popisu příspěvku
 export const generateMetadata = async ({ params }: BlogDetailsProps): Promise<Metadata> => {
   const post = await loadPost(params);
+  const description = truncateDescription(post.description, 160);
 
   return {
     title: post.title,
-    description: truncateDescription(post.description, 160),
-    openGraph: { images: [post.image] },
+    description,
+    openGraph: { title: post.title, description, images: [post.image], type: 'article' },
   };
 };
 
@@ -44,7 +40,7 @@ export const generateMetadata = async ({ params }: BlogDetailsProps): Promise<Me
  * BlogDetailsHome. Nové komentáře se zobrazí díky revalidaci v server action.
  */
 const BlogDetails: FC<BlogDetailsProps> = async ({ params }) => {
-  const [post, session] = await Promise.all([loadPost(params), auth()]);
+  const [post, session] = await Promise.all([loadPost(params), getSession()]);
 
   return <BlogDetailsHome blogData={post} currentUserId={session?.user?.id} />;
 };

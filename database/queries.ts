@@ -1,22 +1,30 @@
 import 'server-only';
 import { cache } from 'react';
+import { auth } from '@/auth';
 import prisma from '@/database/prisma';
 
 /**
- * Serverové dotazy do databáze.
+ * Serverové dotazy do databáze a načtení session.
  * Server komponenty volají Prismu přímo, takže není potřeba HTTP požadavek na vlastní API.
+ * Funkce obalené v cache() se v rámci jednoho požadavku provedou pouze jednou.
  */
 
-// Všechny příspěvky seřazené od nejnovějšího
-export const getAllPosts = () => prisma.post.findMany({ orderBy: { createdAt: 'desc' } });
+// Session přihlášeného uživatele, sdílená hlavičkou, seznamy i stránkami během jednoho požadavku
+export const getSession = cache(() => auth());
+
+// Řazení seznamů od nejnovějšího příspěvku
+const newestFirst = { createdAt: 'desc' } as const;
+
+// Všechny příspěvky
+export const getAllPosts = () => prisma.post.findMany({ orderBy: newestFirst });
 
 // Nejnovější příspěvky pro úvodní stránku
 export const getLatestPosts = (take: number) =>
-  prisma.post.findMany({ orderBy: { createdAt: 'desc' }, take });
+  prisma.post.findMany({ orderBy: newestFirst, take });
 
-// Příspěvky v dané kategorii seřazené od nejnovějšího
+// Příspěvky v dané kategorii
 export const getPostsByCategory = (category: string) =>
-  prisma.post.findMany({ where: { category }, orderBy: { createdAt: 'desc' } });
+  prisma.post.findMany({ where: { category }, orderBy: newestFirst });
 
 /**
  * Detail příspěvku včetně komentářů.
@@ -38,5 +46,5 @@ export const searchPosts = (query: string) =>
         { description: { contains: query, mode: 'insensitive' } },
       ],
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: newestFirst,
   });

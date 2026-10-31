@@ -3,14 +3,16 @@ import { FC } from 'react';
 import clsx from 'clsx';
 import { redirect } from 'next/navigation';
 import { FaGithub, FaGoogle } from 'react-icons/fa';
-import { auth, signIn } from '@/auth';
-import { buttonClasses, panelClasses } from '@/utils/styles';
+import { signIn } from '@/auth';
+import Logo from '@/components/logo';
+import { getSession } from '@/database/queries';
+import { cardClasses, secondaryButtonClasses } from '@/utils/styles';
 
 export const metadata: Metadata = { title: 'Login' };
 
 // Props stránky Login, callbackUrl určuje, kam se uživatel vrátí po přihlášení
 interface LoginProps {
-  searchParams: Promise<{ callbackUrl?: string }>;
+  searchParams: Promise<{ callbackUrl?: string | string[] }>;
 }
 
 // Dostupní OAuth poskytovatelé pro přihlášení
@@ -19,47 +21,61 @@ const providers = [
   { id: 'google', label: 'Continue with Google', Icon: FaGoogle },
 ] as const;
 
-// Povolení pouze relativních cest, aby nešlo přesměrovat na cizí web
-const getSafeCallbackUrl = (url?: string) =>
-  url?.startsWith('/') && !url.startsWith('//') ? url : '/';
+/**
+ * Převod callbackUrl na bezpečnou relativní cestu v rámci aplikace.
+ * URL se parsuje vůči fiktivnímu originu, takže varianty jako //evil.com, /\evil.com
+ * nebo cesty s řídicími znaky, které by prohlížeč přesměroval na cizí web, se odmítnou.
+ */
+const getSafeCallbackUrl = (value?: string | string[]) => {
+  const url = Array.isArray(value) ? value[0] : value;
+  if (!url?.startsWith('/')) return '/';
+
+  const base = 'http://local.invalid';
+  try {
+    const parsed = new URL(url, base);
+    return parsed.origin === base ? parsed.pathname + parsed.search + parsed.hash : '/';
+  } catch {
+    return '/';
+  }
+};
 
 /**
  * Stránka Login s výběrem poskytovatele (GitHub nebo Google).
  * Přihlášený uživatel je rovnou přesměrován zpět.
  */
 const Login: FC<LoginProps> = async ({ searchParams }) => {
-  const { callbackUrl } = await searchParams;
-  const redirectTo = getSafeCallbackUrl(callbackUrl);
+  const redirectTo = getSafeCallbackUrl((await searchParams).callbackUrl);
 
-  const session = await auth();
+  const session = await getSession();
   if (session?.user) redirect(redirectTo);
 
   return (
-    <section className="py-16 md:py-20 lg:py-28">
-      <div className="container pt-[60px]">
-        <div className={clsx(panelClasses, 'mx-auto max-w-[500px] text-center')}>
-          <h1 className="mb-3 text-2xl font-bold text-black sm:text-3xl dark:text-white">
-            Sign in to NextBlog
-          </h1>
-          <p className="mb-10 text-base font-medium text-body-color">
-            Sign in to create blog posts and join the discussion.
-          </p>
-          <div className="flex flex-col gap-4">
-            {providers.map(({ id, label, Icon }) => (
-              <form
-                key={id}
-                action={async () => {
-                  'use server';
-                  await signIn(id, { redirectTo });
-                }}
-              >
-                <button type="submit" className={clsx(buttonClasses, 'w-full gap-3')}>
-                  <Icon size={20} aria-hidden />
-                  {label}
-                </button>
-              </form>
-            ))}
-          </div>
+    <section className="container flex justify-center py-16 sm:py-24">
+      <div className={clsx(cardClasses, 'w-full max-w-md text-center')}>
+        <div className="flex justify-center">
+          <Logo />
+        </div>
+        <h1 className="mt-8 text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          Welcome back
+        </h1>
+        <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+          Sign in to write posts and join the discussion.
+        </p>
+        <div className="mt-8 flex flex-col gap-3">
+          {providers.map(({ id, label, Icon }) => (
+            <form
+              key={id}
+              action={async () => {
+                'use server';
+                await signIn(id, { redirectTo });
+              }}
+            >
+              <button type="submit" className={clsx(secondaryButtonClasses, 'w-full py-3')}>
+                <Icon size={18} aria-hidden />
+                {label}
+              </button>
+            </form>
+          ))}
         </div>
       </div>
     </section>

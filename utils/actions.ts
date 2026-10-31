@@ -3,24 +3,29 @@
 import { del, put } from '@vercel/blob';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { auth, signOut } from '@/auth';
+import { z } from 'zod';
+import { signOut } from '@/auth';
 import prisma from '@/database/prisma';
-import { commentSchema, postSchema } from './validation';
-import { CommentFormState, PostFormState } from './types';
+import { getSession } from '@/database/queries';
+import { IMAGE_TYPES, commentSchema, idSchema, postSchema } from './validation';
+import { ActionResult, CommentFormState, PostFormState } from './types';
 
 /**
  * Server actions aplikace.
- * Každá akce, která mění data, nejprve ověří přihlášeného uživatele a jeho oprávnění.
- * Klient tak už nemůže mazat cizí příspěvky ani přepisovat cizí komentáře.
+ * Server actions jsou veřejné HTTP endpointy, proto každá akce ověřuje vstupy z klienta,
+ * přihlášeného uživatele a jeho oprávnění. Neočekávané chyby se zachytí a uživatel dostane
+ * srozumitelnou zprávu místo chybové stránky.
  */
 
-// Vrátí přihlášeného uživatele, nebo null, pokud uživatel není přihlášen
+const GENERIC_ERROR = 'Something went wrong! Please try again.';
+
+// Vrátí přihlášeného uživatele s ID, nebo null, pokud uživatel není přihlášen
 const getCurrentUser = async () => {
-  const session = await auth();
-  return session?.user?.id ? session.user : null;
+  const user = (await getSession())?.user;
+  return user?.id ? { ...user, id: user.id } : null;
 };
 
-// Smaže obrázek z Vercel Blob, chyba při mazání nesmí zablokovat smazání příspěvku
+// Smaže obrázek z Vercel Blob, chyba při mazání nesmí zablokovat zbytek operace
 const deleteImage = async (url: string) => {
   try {
     await del(url);
@@ -36,8 +41,8 @@ export const signOutAction = async () => {
 
 /**
  * Vytvoření nového blogového příspěvku.
- * Data formuláře se validují na serveru, obrázek se nahraje do Vercel Blob
- * a po uložení je uživatel přesměrován na detail nového příspěvku.
+ * Data formuláře se validují na serveru, obrázek se nahraje do Vercel Blob pod náhodným
+ * názvem s příponou odpovídající typu a po uložení je uživatel přesměrován na nový příspěvek.
  */
 export const createPost = async (
   _prevState: PostFormState,
@@ -56,7 +61,7 @@ export const createPost = async (
 
   // Při neúspěšné validaci se vrátí chyby jednotlivých polí a vyplněné hodnoty
   if (!parsed.success) {
-    const { fieldErrors } = parsed.error.flatten();
+    const { fieldErrors } = z.flattenError(parsed.error);
     return {
       values,
       errors: {
@@ -69,14 +74,16 @@ export const createPost = async (
   }
 
   const { title, description, category, image } = parsed.data;
+  const contentType = image.type as keyof typeof IMAGE_TYPES;
+  let imageUrl: string | null = null;
   let postId: number;
 
   try {
-    // Nahrání obrázku do Vercel Blob s náhodnou příponou názvu
-    const blob = await put(`blog/${image.name}`, image, {
+    const blob = await put(`blog/${crypto.randomUUID()}.${IMAGE_TYPES[contentType]}`, image, {
       access: 'public',
-      addRandomSuffix: true,
+      contentType,
     });
+    imageUrl = blob.url;
 
     const post = await prisma.post.create({
       data: {
@@ -84,7 +91,7 @@ export const createPost = async (
         description,
         category,
         image: blob.url,
-        authorId: user.id!,
+        authorId: user.id,
         authorName: user.name ?? 'Anonymous',
         authorImage: user.image,
       },
@@ -92,7 +99,9 @@ export const createPost = async (
     postId = post.id;
   } catch (error) {
     console.error('Failed to create post:', error);
-    return { values, message: 'Something went wrong! Please try again.' };
+    // Úklid již nahraného obrázku, pokud se příspěvek nepodařilo uložit
+    if (imageUrl) await deleteImage(imageUrl);
+    return { values, message: GENERIC_ERROR };
   }
 
   revalidatePath('/', 'layout');
@@ -101,21 +110,35 @@ export const createPost = async (
 
 /**
  * Smazání blogového příspěvku včetně obrázku a komentářů.
- * Smazat příspěvek může pouze jeho autor.
+ * Smazat příspěvek může pouze jeho autor. Při mazání z detailu příspěvku se uživatel
+ * přesměruje na seznam příspěvků přímo na serveru.
  */
-export const deletePost = async (postId: number) => {
+export const deletePost = async (postId: number, redirectToList = false): Promise<ActionResult> => {
   const user = await getCurrentUser();
   if (!user) return { success: false, message: 'You must be logged in.' };
 
-  const post = await prisma.post.findUnique({ where: { id: postId } });
-  if (!post) return { success: false, message: 'Post not found.' };
-  if (post.authorId !== user.id) return { success: false, message: 'Not allowed.' };
+  const id = idSchema.safeParse(postId);
+  if (!id.success) return { success: false, message: 'Invalid post.' };
 
-  // Komentáře se smažou automaticky díky onDelete: Cascade
-  await prisma.post.delete({ where: { id: postId } });
-  await deleteImage(post.image);
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: id.data },
+      select: { authorId: true, image: true },
+    });
+    if (!post || post.authorId !== user.id) {
+      return { success: false, message: 'Post not found or not allowed.' };
+    }
+
+    // Podmínka na autora zabrání smazání cizího příspěvku i při souběžných požadavcích
+    const { count } = await prisma.post.deleteMany({ where: { id: id.data, authorId: user.id } });
+    if (count) await deleteImage(post.image);
+  } catch (error) {
+    console.error('Failed to delete post:', error);
+    return { success: false, message: GENERIC_ERROR };
+  }
 
   revalidatePath('/', 'layout');
+  if (redirectToList) redirect('/blogs');
   return { success: true };
 };
 
@@ -131,41 +154,55 @@ export const addComment = async (
   const user = await getCurrentUser();
   if (!user) return { error: 'You must be logged in to comment.' };
 
+  const id = idSchema.safeParse(postId);
   const parsed = commentSchema.safeParse({ text: formData.get('text') });
+  if (!id.success) return { error: 'Invalid post.' };
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
 
   try {
     await prisma.comment.create({
       data: {
         text: parsed.data.text,
-        postId,
-        authorId: user.id!,
+        postId: id.data,
+        authorId: user.id,
         authorName: user.name ?? 'Anonymous',
       },
     });
   } catch (error) {
     console.error('Failed to add comment:', error);
-    return { error: 'Something went wrong! Please try again.' };
+    return { error: GENERIC_ERROR };
   }
 
-  revalidatePath(`/blogs/${postId}`);
-  return { success: true };
+  revalidatePath(`/blogs/${id.data}`);
+  return { submissionId: crypto.randomUUID() };
 };
 
 /**
  * Smazání komentáře.
  * Komentář může smazat jeho autor nebo autor příspěvku.
  */
-export const deleteComment = async (commentId: number) => {
+export const deleteComment = async (commentId: number): Promise<ActionResult> => {
   const user = await getCurrentUser();
-  if (!user) return;
+  if (!user) return { success: false, message: 'You must be logged in.' };
 
-  const comment = await prisma.comment.findUnique({
-    where: { id: commentId },
-    include: { post: { select: { authorId: true } } },
-  });
-  if (!comment || (comment.authorId !== user.id && comment.post.authorId !== user.id)) return;
+  const id = idSchema.safeParse(commentId);
+  if (!id.success) return { success: false, message: 'Invalid comment.' };
 
-  await prisma.comment.delete({ where: { id: commentId } });
-  revalidatePath(`/blogs/${comment.postId}`);
+  try {
+    // Smaže se pouze komentář, jehož autorem je uživatel, nebo komentář pod jeho příspěvkem
+    const comment = await prisma.comment.findUnique({
+      where: { id: id.data },
+      select: { postId: true },
+    });
+    const { count } = await prisma.comment.deleteMany({
+      where: { id: id.data, OR: [{ authorId: user.id }, { post: { authorId: user.id } }] },
+    });
+    if (!comment || !count) return { success: false, message: 'Comment not found or not allowed.' };
+
+    revalidatePath(`/blogs/${comment.postId}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to delete comment:', error);
+    return { success: false, message: GENERIC_ERROR };
+  }
 };

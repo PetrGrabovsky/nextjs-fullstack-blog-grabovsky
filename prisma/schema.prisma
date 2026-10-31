@@ -22,7 +22,9 @@ model Post {
   createdAt   DateTime  @default(now()) // Datum vytvoření příspěvku
   comments    Comment[] // Komentáře k příspěvku
 
-  @@index([category])
+  // Indexy pro seznamy řazené od nejnovějšího (všechny příspěvky a příspěvky v kategorii)
+  @@index([createdAt(sort: Desc)])
+  @@index([category, createdAt(sort: Desc)])
 }
 
 // Komentář k blogovému příspěvku
