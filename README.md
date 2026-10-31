@@ -4,12 +4,16 @@ A full-stack blog application built with the Next.js App Router. Users sign in w
 
 **Live demo:** https://nextjs-fullstack-blog-grabovsky.vercel.app
 
+![NextBlog home page with the latest posts](docs/screenshot.png)
+
+I started NextBlog in August 2024 as my first full-stack project, while learning to program. In October 2026 I rebuilt it with Claude Code on current versions of Next.js, React, Prisma and Auth.js, moved images from Firebase to Vercel Blob, and moved every authorship check to the server.
+
 ## Features
 
 - Sign in with **GitHub** or **Google** (Auth.js v5)
 - Create blog posts with an image upload to **Vercel Blob**, with server-side validation (zod)
-- Browse all posts, filter by category and see related posts
-- Full-text search in titles and content (shareable URL `?q=`)
+- Browse all posts and filter them by category
+- Search titles and post text, case-insensitive (shareable URL `?q=`)
 - Comments with author badge; authors can delete their own posts (with confirmation) and comments
 - Light and dark theme, responsive layout with mobile menu
 
@@ -28,13 +32,14 @@ A full-stack blog application built with the Next.js App Router. Users sign in w
 
 - **Server Components** read data directly from the database through Prisma (`database/queries.ts`), there is no internal REST API.
 - **Server Actions** (`utils/actions.ts`) handle all mutations. Every action verifies the signed-in user and authorship on the server.
+- **Cache Components:** post queries use `'use cache'` with tags, and the Server Actions refresh them with `updateTag` after a post or comment changes. The home page, the post list, the categories and existing posts are prerendered at build time, and the parts that depend on the signed-in user load in Suspense.
 - Comments are stored in a separate `Comment` table, so concurrent comments never overwrite each other.
 - Uploaded images are validated (type and size) and stored in Vercel Blob under random names.
 - Database migrations are applied automatically on Vercel by the `vercel-build` script.
 
 ## Getting Started
 
-Requirements: Node.js 24+ and a PostgreSQL database.
+Requirements: Node.js 24 and a PostgreSQL database.
 
 1. Install dependencies (this also generates the Prisma client):
 
