@@ -1,14 +1,24 @@
-import BlogList from '@/components/blog-list';
+import type { Metadata } from 'next';
 import { FC } from 'react';
-import { extractAllBlogs } from '@/utils/helpers';
+import BlogList from '@/components/blog-list';
+import PageSection from '@/components/page-section';
+import { getAllPosts } from '@/database/queries';
+
+export const metadata: Metadata = { title: 'All Blogs' };
 
 // Komponenta Blogs zobrazuje seznam všech blogových příspěvků
 const Blogs: FC = async () => {
-  // Načtení všech blogových příspěvků
-  const blogPostsList = await extractAllBlogs();
+  // Načtení všech blogových příspěvků přímo z databáze
+  const blogPostsList = await getAllPosts();
 
-  // Vrátí komponentu BlogList s načtenými blogovými příspěvky
-  return <BlogList lists={blogPostsList} />;
+  return (
+    <PageSection title="All Blogs">
+      <BlogList
+        lists={blogPostsList}
+        emptyMessage="No blog posts yet. Be the first to write one!"
+      />
+    </PageSection>
+  );
 };
 
 export default Blogs;

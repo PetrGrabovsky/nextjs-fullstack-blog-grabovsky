@@ -1,224 +1,135 @@
-'use client';
-
-import { headingH2Classes, paragraphClasses } from '@/utils/styles';
-import { Blog } from '@/utils/types';
-import { ChangeEvent, FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 import clsx from 'clsx';
 import Image from 'next/image';
 import Link from 'next/link';
-import Button from './button';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { BlogWithComments } from '@/utils/types';
+import {
+  buttonClasses,
+  categoryBadgeClasses,
+  headingH2Classes,
+  paragraphClasses,
+} from '@/utils/styles';
+import { formatDate, getCategoryLabel } from '@/utils/helpers';
+import Avatar from './avatar';
+import CommentForm from './comment-form';
+import DeleteCommentButton from './delete-comment-button';
+import DeletePostButton from './delete-post-button';
 
 /**
  * Typový interface pro props komponenty BlogDetailsHome.
- * Tato komponenta příjmá objekt blogData, který obsahuje všechny relevantní informace
- * o blogovém příspěvku.
+ * Komponenta přijímá příspěvek včetně komentářů a ID přihlášeného uživatele.
  */
 interface BlogDetailsHomeProps {
-  blogData: Blog; // Objekt reprezentující blogový příspěvek
+  blogData: BlogWithComments; // Objekt reprezentující blogový příspěvek
+  currentUserId?: string; // ID přihlášeného uživatele, pokud je přihlášen
 }
 
 /**
- * Komponenta BlogDetailHome.
+ * Komponenta BlogDetailsHome.
  * Tato komponenta zobrazuje detailní informace o konkrétním blogovém příspěvku,
  * včetně titulku, obrázku, popisu, autora a kategorie.
  * Umožňuje také přidání komentáře k příspěvku a zobrazení diskuze pod příspěvkem.
  */
-const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData }) => {
-  // Použití useState pro uložení a nastavení textu komentáře, který uživatel píše do inputu
-  const [comment, setComment] = useState<string>('');
-  // Použití useSession pro získání informací o aktualní session kvůli identifikaci uživatele
-  const { data: session } = useSession();
-  // Hook useRouter pro možnost navigace a obnovení stránky (refresh)
-  const router = useRouter();
-
-  /**
-   * Funkce handleCommentSave.
-   * Tato funkce obsluhuje událost kliknutí na tlačítko pro přidání komentáře.
-   * Uloží nový komentář ke konkrétnímu příspěvku prostřednictvím API požadavku.
-   */
-  const handleCommentSave = async () => {
-    if (comment.trim().length < 3) {
-      return; // Zastaví odeslání, pokud validace neprojde
-    }
-
-    // Přidání nového komentáře do seznamu stávajících komentářů
-    const extractComments = [...blogData.comments];
-    extractComments.push(`${comment}|${session?.user?.name}`);
-
-    // Odeslání požadavku na aktualizaci příspěvku s novým komentářem
-    const response = await fetch(`/api/blog-post/update-post`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        id: blogData?.id,
-        comments: extractComments,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (data && data.success) {
-      // Po úspěšném uložení se input pro komentáře vyprázdní a stránka se obnoví (refresh)
-      setComment('');
-      router.refresh();
-    }
-  };
-
-  /**
-   * Funkce handleCommentChange.
-   * Tato funkce se spouští při změně hodnoty inputu pro komentáře.
-   * Aktualizuje stav comment pomocí setteru setComment na aktuální hodnotu v inputu.
-   */
-  const handleCommentChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setComment(event.target.value);
-  };
-
-  /**
-   * Použití useEffect pro automatickou aktualizaci stránky každé 2 sekundy.
-   * Interval je nastaven pro pravidelné obnovení obsahu diskuze.
-   */
-  useEffect(() => {
-    const interval = setInterval(() => {
-      router.refresh();
-    }, 2000);
-
-    // Funkce pro vyčištění intervalu při odpojení komponenty.
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-
-  // Pokud nejsou k dispozici žádná data pro blog, komponenta se nevykreslí
-  if (!blogData) return;
+const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData, currentUserId }) => {
+  const isPostAuthor = blogData.authorId === currentUserId;
 
   return (
-    // Hlavní sekce komponenty
-    <section className="pb-[120px] pt-[150px]">
+    <section className="pt-[150px] pb-[120px]">
       <div className="container">
-        <div className="-mx-4 flex flex-col items-center justify-center gap-4">
-          <div className="w-full px-4 lg:w-8/12">
-            <div>
-              {/* Zobrazení nadpisu příspěvku */}
-              <h2 className={headingH2Classes}>{blogData?.title}</h2>
-              <div
-                className={clsx(
-                  'mb-10 flex flex-wrap items-center justify-between border-b border-body-color',
-                  'border-opacity-10 pb-4 dark:border-white dark:border-opacity-10'
-                )}
-              >
-                <div className="flex flex-wrap items-center">
-                  {/* Sekce s informacemi o autorovi příspěvku */}
-                  <div className="mb-5 mr-10 flex items-center">
-                    <div className="mr-4">
-                      <div className="relative h-10 w-10 overflow-hidden rounded-full">
-                        {/* Zobrazení obrázku autora blogu */}
-                        <Image src={blogData?.userimage} alt="User" fill />
-                      </div>
-                    </div>
-                    <div className="w-full">
-                      {/* Zobrazení jména autora příspěvku */}
-                      <h4 className="mb-1 text-base font-medium text-body-color">
-                        By
-                        <span className="pl-2">{blogData?.userid.split('_')[0]}</span>
-                      </h4>
-                    </div>
-                  </div>
-                </div>
-                <div className="mb-5">
-                  {/* Odkaz na kategorii blogového příspěvku */}
-                  <Link
-                    href={`/category/${blogData?.category}`}
-                    className={clsx(
-                      'inline-flex items-center justify-center rounded-full bg-primary px-4 py-2',
-                      'text-sm font-semibold text-white'
-                    )}
+        <div className="mx-auto flex flex-col gap-4 lg:w-8/12">
+          <article>
+            {/* Zobrazení nadpisu příspěvku */}
+            <h1 className={headingH2Classes}>{blogData.title}</h1>
+            <div
+              className={clsx(
+                'mb-10 flex flex-wrap items-center justify-between gap-4 border-b',
+                'border-body-color/10 pb-4 dark:border-white/10'
+              )}
+            >
+              {/* Sekce s informacemi o autorovi příspěvku */}
+              <div className="flex items-center gap-4">
+                <Avatar name={blogData.authorName} image={blogData.authorImage} />
+                <div>
+                  <p className="text-base font-medium text-body-color">
+                    By <span className="text-dark dark:text-white">{blogData.authorName}</span>
+                  </p>
+                  <time
+                    dateTime={blogData.createdAt.toISOString()}
+                    className="text-sm text-body-color"
                   >
-                    {blogData?.category}
-                  </Link>
+                    {formatDate(blogData.createdAt)}
+                  </time>
                 </div>
               </div>
-              <div>
-                {/* Sekce pro zobrazení obrázku příspěvku */}
-                <div className="mb-10 w-full overflow-hidden rounded">
-                  <div className="relative aspect-[97/60] w-full sm:aspect-[97/44]">
-                    {/* Obrázek příspěvku */}
-                    <Image
-                      src={blogData?.image || ''}
-                      alt="Blog"
-                      fill
-                      className="object-cover object-center"
-                    />
-                  </div>
-                </div>
-                {/* Zobrazení popisu (obsahu) příspěvku */}
-                <p className={paragraphClasses}>{blogData?.description}</p>
+              <div className="flex items-center gap-4">
+                {/* Odkaz na kategorii blogového příspěvku */}
+                <Link href={`/category/${blogData.category}`} className={categoryBadgeClasses}>
+                  {getCategoryLabel(blogData.category)}
+                </Link>
+                {/* Smazání příspěvku pouze pro autora */}
+                {isPostAuthor && <DeletePostButton postId={blogData.id} redirectTo="/blogs" />}
               </div>
             </div>
-          </div>
-          {/* Sekce pro přidání komentáře */}
-          <div className="flex w-full gap-4 lg:w-8/12">
-            {/* Input a tlačítko pro přidání komentáře se zobrazí pokud je uživatel přihlášen. */}
-            {session !== null ? (
-              <>
-                <input
-                  name="comment"
-                  id="comment"
-                  autoComplete="off"
-                  placeholder="Add comment here"
-                  value={comment}
-                  onChange={handleCommentChange} // Při změně se aktualizuje stav comment
-                  className={clsx(
-                    'w-full rounded-md border border-transparent px-6 py-3 text-base text-body-color',
-                    'placeholder-body-color shadow-one outline-none focus:border-primary',
-                    'focus-visible:shadow-none dark:bg-[#242B51] dark:shadow-signUp'
-                  )}
-                />
-                {/* Tlačítko pro uložení komentáře */}
-                <Button text="Add" onClick={handleCommentSave} />
-              </>
-            ) : null}
-          </div>
+            {/* Obrázek příspěvku */}
+            <div className="relative mb-10 aspect-[97/60] w-full overflow-hidden rounded sm:aspect-[97/44]">
+              <Image
+                src={blogData.image}
+                alt={blogData.title}
+                fill
+                priority
+                sizes="(min-width: 992px) 66vw, 100vw"
+                className="object-cover object-center"
+              />
+            </div>
+            {/* Zobrazení popisu (obsahu) příspěvku */}
+            <p className={paragraphClasses}>{blogData.description}</p>
+          </article>
           {/* Sekce pro zobrazení diskuze pod příspěvkem */}
-          <section className="w-full py-8 dark:bg-gray-900 lg:w-8/12 lg:py-16">
-            <div className="mb-6 flex items-center justify-between">
-              {/* Zobrazení celkového počtu komentářů u příspěvku */}
-              <h2 className="text-lg font-bold text-black dark:text-white lg:text-2xl">
-                Discussion ({blogData?.comments.length})
-              </h2>
-            </div>
-            {/* Zobrazení komentářů příspěvku, pokud nějaké existují */}
-            {blogData && blogData.comments && blogData.comments.length > 0
-              ? blogData.comments.map((comment, index) => (
-                  <div key={index} className="rounded-lg p-6 text-base dark:bg-gray-900">
-                    <div className="mb-2 flex items-center justify-between">
-                      <div className="flex items-center">
-                        <p
-                          className={clsx(
-                            'mr-3 inline-flex items-center text-sm text-black dark:text-white',
-                            'font-semibold'
-                          )}
-                        >
-                          {/* Zobrazení jména autora komentáře. Pokud je komentář od autora
-                              příspěvku, zobrazí se za jeho jménem text (Author).
-                              Kód rozděluje komentář na dvě části oddělené znakem |.
-                              Druhá část obsahuje ID autora komentáře.
-                              Pokud se ID autora komentáře shoduje s ID autora příspěvku,
-                              přidá se za jméno označení (Author) */}
-                          {comment.split('|')[1] === blogData?.userid
-                            ? `${comment.split('|')[1].split('_')[0]} (Author)`
-                            : comment.split('|')[1].split('_')[0]}
-                        </p>
-                      </div>
-                    </div>
-                    {/* Zobrazení samotného komentáře */}
-                    <p className="text-gray-500 dark:text-gray-400">{comment.split('|')[0]}</p>
+          <section className="w-full py-8 lg:py-16">
+            <h2 className="mb-6 text-lg font-bold text-black lg:text-2xl dark:text-white">
+              Discussion ({blogData.comments.length})
+            </h2>
+            {/* Formulář pro přidání komentáře, nebo výzva k přihlášení */}
+            {currentUserId ? (
+              <CommentForm postId={blogData.id} />
+            ) : (
+              <div className="flex flex-wrap items-center gap-4">
+                <p className="text-body-color">Log in to join the discussion.</p>
+                <Link href="/login" className={buttonClasses}>
+                  Login
+                </Link>
+              </div>
+            )}
+            {/* Seznam komentářů */}
+            <ul className="mt-6">
+              {blogData.comments.map((comment) => (
+                <li
+                  key={comment.id}
+                  className="border-b border-body-color/10 py-6 text-base dark:border-white/10"
+                >
+                  <div className="mb-2 flex items-center justify-between gap-4">
+                    {/* Jméno autora komentáře, autor příspěvku je označen (Author) */}
+                    <p className="text-sm font-semibold text-black dark:text-white">
+                      {comment.authorName}
+                      {comment.authorId === blogData.authorId && (
+                        <span className="ml-2 font-normal text-primary">(Author)</span>
+                      )}
+                      <time
+                        dateTime={comment.createdAt.toISOString()}
+                        className="ml-3 font-normal text-body-color"
+                      >
+                        {formatDate(comment.createdAt)}
+                      </time>
+                    </p>
+                    {/* Smazání komentáře pro autora komentáře a autora příspěvku */}
+                    {(comment.authorId === currentUserId || isPostAuthor) && (
+                      <DeleteCommentButton commentId={comment.id} />
+                    )}
                   </div>
-                ))
-              : null}
+                  <p className="whitespace-pre-line text-body-color">{comment.text}</p>
+                </li>
+              ))}
+            </ul>
           </section>
         </div>
       </div>

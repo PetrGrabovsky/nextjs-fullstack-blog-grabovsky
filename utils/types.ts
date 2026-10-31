@@ -1,24 +1,24 @@
-import { Dispatch, SetStateAction } from 'react';
+import type { DefaultSession } from 'next-auth';
+import type { Comment, Post } from '@/generated/prisma/client';
 
-// Definice typu pro kontext GlobalContext
-export type GlobalContextType = {
-  // Určuje, zda je aplikace ve stavu načítání
-  loading: boolean;
-  // Funkce pro nastavení stavu načítání
-  setLoading: Dispatch<SetStateAction<boolean>>;
-  // Data blogového formuláře
-  formData: BlogFormData;
-  // Funkce pro nastavení dat blogového formuláře
-  setFormData: Dispatch<SetStateAction<BlogFormData>>;
-  // Vyhledávací dotaz zadaný uživatelem
-  searchQuery: string;
-  // Funkce pro nastavení vyhledávacího dotazu
-  setSearchQuery: Dispatch<SetStateAction<string>>;
-  // Výsledky vyhledávání blogových příspěvků
-  searchResults: Blog[];
-  // Funkce pro nastavení výsledků vyhledávání
-  setSearchResults: Dispatch<SetStateAction<Blog[]>>;
-};
+// Rozšíření typu session o ID uživatele, které se nastavuje v auth.ts
+declare module 'next-auth' {
+  interface Session {
+    user: { id?: string } & DefaultSession['user'];
+  }
+}
+
+// Typy modelů z databáze
+export type Blog = Post;
+export type BlogComment = Comment;
+export type BlogWithComments = Post & { comments: Comment[] };
+
+// Přihlášený uživatel předávaný do klientských komponent
+export interface CurrentUser {
+  id: string;
+  name?: string | null;
+  image?: string | null;
+}
 
 // Rozhraní pro položky menu
 export interface MenuItem {
@@ -35,30 +35,30 @@ export interface CategoryOption {
 
 // Rozhraní pro položky formuláře, které definují jednotlivé prvky formuláře
 export interface FormControlItem {
-  id: string; // Unikátní identifikátor
+  id: keyof BlogFormValues; // Unikátní identifikátor, odpovídá názvu pole formuláře
   label: string; // Popis položky formuláře
   placeholder: string; // Placeholder
   type: string; // Typ vstupu (např. text, email, password...)
-  component: string; // Použitá komponenta (např. input, select...)
+  component: 'input' | 'textarea' | 'select'; // Použitá komponenta
   options: CategoryOption[]; // Seznam možností, pokud je položka komponenta select
 }
 
-// Rozhraní pro data blogového formuláře
-export interface BlogFormData {
+// Hodnoty textových polí formuláře pro vytvoření příspěvku
+export interface BlogFormValues {
   title: string; // Název příspěvku
   description: string; // Obsah příspěvku
-  image: string; // URL obrázku blogového příspěvku
   category: string; // Kategorie příspěvku
 }
 
-// Rozhraní reprezentující blogový příspěvek
-export interface Blog {
-  id: number; // Unikátní identifikátor
-  title: string; // Název příspěvku
-  image: string; // Obrázek příspěvku
-  description: string; // Obsah příspěvku
-  category: string; // Kategorie příspěvku
-  userid: string; // ID autora příspěvku
-  userimage: string; // URL obrázku autora příspěvku
-  comments: string[]; // Pole komentářů k příspěvku
+// Stav formuláře pro vytvoření příspěvku vrácený ze server action
+export interface PostFormState {
+  values?: BlogFormValues; // Odeslané hodnoty pro opětovné vyplnění formuláře
+  errors?: Partial<Record<keyof BlogFormValues | 'image', string>>; // Chyby jednotlivých polí
+  message?: string; // Obecná chybová zpráva
+}
+
+// Stav formuláře pro přidání komentáře vrácený ze server action
+export interface CommentFormState {
+  error?: string; // Chybová zpráva
+  success?: boolean; // Příznak úspěšného uložení
 }

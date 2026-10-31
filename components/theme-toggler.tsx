@@ -5,20 +5,21 @@ import { useTheme } from 'next-themes';
 import { MdDarkMode } from 'react-icons/md';
 import { BsSunFill } from 'react-icons/bs';
 
-// Komponenta ThemeToggler pro přepínání mezi světlím a tmavým režimem
+// Komponenta ThemeToggler pro přepínání mezi světlým a tmavým režimem
 const ThemeToggler: FC = () => {
-  // Použití hooku useTheme pro zíkání a nastavení aktuálního tématu
-  const { theme, setTheme } = useTheme();
-
-  // Funkce pro přepínání mezi tématy
-  const handleToggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
+  // resolvedTheme je na serveru undefined, ikony se proto přepínají pouze přes CSS (dark:)
+  const { resolvedTheme, setTheme } = useTheme();
 
   return (
-    <button onClick={handleToggleTheme}>
-      {/* Ikona slunce pro světlý režim a měsíce pro tmavý režim */}
-      {theme === 'dark' ? <BsSunFill size={30} /> : <MdDarkMode size={30} />}
+    <button
+      type="button"
+      aria-label="Toggle dark mode"
+      onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+      className="text-black dark:text-white"
+    >
+      {/* Ikona slunce v tmavém režimu a měsíce ve světlém režimu */}
+      <BsSunFill size={30} className="hidden dark:block" />
+      <MdDarkMode size={30} className="dark:hidden" />
     </button>
   );
 };

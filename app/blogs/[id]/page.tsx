@@ -1,30 +1,52 @@
-import BlogDetailsHome from '@/components/blog-details-home';
+import type { Metadata } from 'next';
 import { FC } from 'react';
-import { extractBlogDetails } from '@/utils/helpers';
+import { notFound } from 'next/navigation';
+import { auth } from '@/auth';
+import BlogDetailsHome from '@/components/blog-details-home';
+import { getPostById } from '@/database/queries';
+import { truncateDescription } from '@/utils/helpers';
 
 /**
- * Typový interface pro props komponenty BlogDetails.
- * Komponenta příjmá ID blogového příspěvku prostřednictvím objektu params.
+ * Typový interface pro props stránky BlogDetails.
+ * V Next.js 15+ jsou parametry cesty asynchronní (Promise).
  */
 interface BlogDetailsProps {
-  params: {
-    id: string; // ID příspěvku jako string
-  };
+  params: Promise<{ id: string }>;
 }
 
+// Načtení příspěvku podle ID z URL, neplatné nebo neexistující ID vede na stránku 404
+const loadPost = async (params: BlogDetailsProps['params']) => {
+  const { id } = await params;
+  const postId = Number(id);
+
+  if (!Number.isInteger(postId) || postId <= 0) notFound();
+
+  const post = await getPostById(postId);
+  if (!post) notFound();
+
+  return post;
+};
+
+// Metadata stránky podle titulku a popisu příspěvku
+export const generateMetadata = async ({ params }: BlogDetailsProps): Promise<Metadata> => {
+  const post = await loadPost(params);
+
+  return {
+    title: post.title,
+    description: truncateDescription(post.description, 160),
+    openGraph: { images: [post.image] },
+  };
+};
+
 /**
- * Komponenta BlogDetails
- * Tato komponenta (stránka) slouží k načtení a zobrazení detailních informací o příspěvku.
- * Nejprve se na základě ID načtou jeho detaily pomocí funkce extractBlogDetails.
- * Poté se tyto detaily předají komponentě BlogDetailsHome pro zobrazení.
+ * Stránka BlogDetails.
+ * Načte detail příspěvku včetně komentářů přímo z databáze a předá jej komponentě
+ * BlogDetailsHome. Nové komentáře se zobrazí díky revalidaci v server action.
  */
 const BlogDetails: FC<BlogDetailsProps> = async ({ params }) => {
-  const { id } = params; // Extrakce ID příspěvku z parametrů
+  const [post, session] = await Promise.all([loadPost(params), auth()]);
 
-  const blogData = await extractBlogDetails(id); // Načtení detailů příspěvku
-
-  // Rendrování komponenty BlogDetailsHome s načtenými daty blogového příspěvku
-  return <BlogDetailsHome blogData={blogData} />;
+  return <BlogDetailsHome blogData={post} currentUserId={session?.user?.id} />;
 };
 
 export default BlogDetails;

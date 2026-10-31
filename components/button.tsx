@@ -1,27 +1,17 @@
-import { FC } from 'react';
+import { ButtonHTMLAttributes, FC } from 'react';
 import clsx from 'clsx';
+import { buttonClasses } from '@/utils/styles';
 
-// Definice typů pro props komponenty Button
-interface ButtonProps {
+// Definice typů pro props komponenty Button (přijímá všechny atributy elementu <button>)
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   // Text tlačítka
   text: string;
-  // Funkce volaná při kliknutí na tlačítko
-  onClick: () => void;
-  // Volitelné TailwindCSS třídy
-  className?: string;
 }
 
-// Funkční komponenta Button
-const Button: FC<ButtonProps> = ({ text, onClick, className }) => {
+// Funkční komponenta Button, výchozí typ je "button", aby tlačítko neodesílalo formulář omylem
+const Button: FC<ButtonProps> = ({ text, className, type = 'button', ...props }) => {
   return (
-    <button
-      onClick={onClick}
-      className={clsx(
-        className,
-        'rounded-md bg-primary px-9 py-4 text-base font-medium text-white transition',
-        'duration-300 ease-in-out hover:opacity-80 hover:shadow-signUp'
-      )}
-    >
+    <button type={type} className={clsx(buttonClasses, className)} {...props}>
       {text}
     </button>
   );
