@@ -22,7 +22,7 @@ A full-stack blog application built with the Next.js App Router. Users sign in w
 | Auth      | Auth.js (NextAuth v5) – GitHub & Google OAuth, JWT sessions          |
 | Storage   | Vercel Blob for post images                                          |
 | Styling   | Tailwind CSS 4, next-themes                                          |
-| Tooling   | TypeScript, ESLint 10, Prettier, Husky + lint-staged                 |
+| Tooling   | TypeScript, ESLint 9, Prettier, Husky + lint-staged                  |
 
 ## Architecture
 
