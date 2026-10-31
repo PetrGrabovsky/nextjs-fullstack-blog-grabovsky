@@ -5,17 +5,17 @@ export const menuItems: MenuItem[] = [
   {
     id: 'home',
     label: 'Home',
-    path: '/', // Adresa domovké (home) stránky
-  },
-  {
-    id: 'category',
-    label: 'Category',
-    path: '/category/application', // Adresa category stránky
+    path: '/', // Adresa domovské (home) stránky
   },
   {
     id: 'blogs',
-    label: 'Blogs',
-    path: '/blogs', // Adresa blogs stránky
+    label: 'Posts',
+    path: '/blogs', // Adresa stránky se všemi příspěvky
+  },
+  {
+    id: 'category',
+    label: 'Categories',
+    path: '/category/application', // Adresa stránky kategorií (výchozí kategorie)
   },
   {
     id: 'search',
@@ -53,25 +53,20 @@ export const formControls: FormControlItem[] = [
   {
     id: 'title',
     label: 'Title',
-    placeholder: 'Enter Blog Title',
-    type: 'text',
+    placeholder: 'Give your post a catchy title',
     component: 'input',
-    options: [],
-  },
-  {
-    id: 'description',
-    label: 'Description',
-    placeholder: 'Enter Blog Description',
-    type: 'text',
-    component: 'textarea',
-    options: [],
   },
   {
     id: 'category',
     label: 'Category',
-    placeholder: 'Choose Blog Category',
-    type: '',
+    placeholder: 'Choose a category',
     component: 'select',
     options: categories,
+  },
+  {
+    id: 'description',
+    label: 'Content',
+    placeholder: 'Write your story (at least 50 characters)...',
+    component: 'textarea',
   },
 ];

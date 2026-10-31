@@ -1,66 +1,84 @@
 import clsx from 'clsx';
 
 /**
- * TailwindCSS třídy pro nastavení stylů header elementu v komponentě Header.
- * Tyto třídy se aplikují, když je header element ve sticky stavu, tedy když uživatel
- * scrolluje stránkou.
+ * Sdílené TailwindCSS třídy pro opakující se prvky rozhraní.
+ * Udržují jednotný vzhled tlačítek, formulářů a nadpisů napříč aplikací.
  */
-export const stickyHeaderClasses = clsx(
-  'fixed! z-9999! bg-white/80! shadow-sticky backdrop-blur-sm transition! dark:bg-primary/20!'
+
+// Základ všech tlačítek (velikost, zaoblení, fokus, zakázaný stav)
+const buttonBase = clsx(
+  'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold',
+  'transition duration-200 disabled:cursor-not-allowed disabled:opacity-60'
 );
 
-/**
- * Společné třídy pro všechny span elementy hamburger ikony v Header komponentě.
- * Tyto třídy definují vzhled a chování jednotlivých čar ikony hamburger menu.
- */
-export const hamburgerLineClasses = clsx(
-  'relative my-1.5 block h-0.5 w-[30px] bg-black transition-all duration-300 dark:bg-white'
-);
-
-// Definice opakujících se TailwindCSS tříd pro inputy
-export const inputClasses = clsx(
-  'w-full rounded-md border border-transparent bg-white px-6 py-3 text-base text-body-color',
-  'placeholder-body-color shadow-one outline-none focus:border-primary focus-visible:shadow-none',
-  'dark:bg-[#242B51] dark:shadow-signup'
-);
-
-// Definice opakujících se TailwindCSS tříd pro labely
-export const labelClasses = 'mb-3 block text-sm font-medium text-dark dark:text-white';
-
-// Definice opakujících se TailwindCSS tříd pro chybové hlášky formulářů
-export const errorClasses = 'mt-2 text-sm text-red-500';
-
-// Definice opakujících se TailwindCSS tříd pro tlačítka
+// Primární tlačítko (hlavní akce)
 export const buttonClasses = clsx(
-  'inline-flex items-center justify-center rounded-md bg-primary px-9 py-4 text-base font-medium',
-  'text-white transition duration-300 ease-in-out hover:opacity-80 hover:shadow-signup',
-  'disabled:cursor-not-allowed disabled:opacity-60'
+  buttonBase,
+  'bg-primary-600 text-white shadow-sm shadow-primary-600/20 hover:bg-primary-500'
 );
 
-// Definice opakujících se TailwindCSS tříd pro štítek kategorie
+// Sekundární tlačítko (vedlejší akce)
+export const secondaryButtonClasses = clsx(
+  buttonBase,
+  'border border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50',
+  'dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800'
+);
+
+// Tlačítko s ikonou bez pozadí (mazání, přepnutí tématu)
+export const iconButtonClasses = clsx(
+  'inline-flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 transition',
+  'hover:bg-zinc-100 hover:text-zinc-900 disabled:opacity-50',
+  'dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100'
+);
+
+// Vstupní pole formulářů
+export const inputClasses = clsx(
+  'block w-full rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-base text-zinc-900',
+  'transition placeholder:text-zinc-400 focus:border-primary-500 focus:ring-4',
+  'focus:ring-primary-500/15 focus:outline-none aria-invalid:border-red-500',
+  'dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500'
+);
+
+// Popisky formulářových polí
+export const labelClasses = 'mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300';
+
+// Chybové hlášky formulářů
+export const errorClasses = 'mt-2 text-sm text-red-600 dark:text-red-400';
+
+// Štítek kategorie
 export const categoryBadgeClasses = clsx(
-  'inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm',
-  'font-semibold text-white'
+  'inline-flex items-center rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold',
+  'text-primary-700 dark:bg-primary-500/15 dark:text-primary-300'
 );
 
-// Definice opakujících se TailwindCSS tříd pro nadpis <h2>
-export const headingH2Classes = clsx(
-  'mb-8 text-3xl leading-tight font-bold text-black sm:text-4xl dark:text-white'
+// Filtrovací čip kategorie (aktivní a neaktivní stav)
+export const chipClasses = (active: boolean) =>
+  clsx(
+    'inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium transition',
+    active
+      ? 'border-primary-600 bg-primary-600 text-white'
+      : clsx(
+          'border-zinc-200 text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50',
+          'dark:border-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-900'
+        )
+  );
+
+// Hlavní nadpis stránky
+export const pageTitleClasses =
+  'text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl dark:text-white';
+
+// Podnadpis / popis pod hlavním nadpisem stránky
+export const pageDescriptionClasses = 'mt-3 text-lg text-zinc-600 dark:text-zinc-400';
+
+// Nadpis sekce
+export const sectionTitleClasses =
+  'text-xl font-semibold tracking-tight text-zinc-900 dark:text-white';
+
+// Karta / panel s ohraničením (formuláře, přihlášení)
+export const cardClasses = clsx(
+  'rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-10',
+  'dark:border-zinc-800 dark:bg-zinc-900/50'
 );
 
-// Definice opakujících se TailwindCSS tříd pro nadpis <h3>
-export const headingH3Classes = clsx(
-  'border-b border-body-color/10 px-8 py-4 text-lg font-semibold text-black',
-  'dark:border-white/10 dark:text-white'
-);
-
-// Definice opakujících se TailwindCSS tříd pro paragraf <p>
-export const paragraphClasses = clsx(
-  'mb-8 text-base leading-relaxed font-medium whitespace-pre-line text-body-color sm:text-lg',
-  'lg:text-base xl:text-lg'
-);
-
-// Definice opakujících se TailwindCSS tříd pro panel (formuláře, boxy v postranním sloupci)
-export const panelClasses = clsx(
-  'rounded-md bg-primary/3 px-8 py-10 sm:p-[55px] lg:px-8 xl:p-[55px] dark:bg-dark'
-);
+// Tlumený doplňkový text (datum, autor)
+export const mutedTextClasses = 'text-sm text-zinc-500 dark:text-zinc-400';

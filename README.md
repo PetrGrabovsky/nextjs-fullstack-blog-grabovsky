@@ -10,7 +10,7 @@ A full-stack blog application built with the Next.js App Router. Users sign in w
 - Create blog posts with an image upload to **Vercel Blob**, with server-side validation (zod)
 - Browse all posts, filter by category and see related posts
 - Full-text search in titles and content (shareable URL `?q=`)
-- Comments with author badge; authors can delete their own posts and comments
+- Comments with author badge; authors can delete their own posts (with confirmation) and comments
 - Light and dark theme, responsive layout with mobile menu
 
 ## Tech Stack
@@ -29,6 +29,8 @@ A full-stack blog application built with the Next.js App Router. Users sign in w
 - **Server Components** read data directly from the database through Prisma (`database/queries.ts`), there is no internal REST API.
 - **Server Actions** (`utils/actions.ts`) handle all mutations. Every action verifies the signed-in user and authorship on the server.
 - Comments are stored in a separate `Comment` table, so concurrent comments never overwrite each other.
+- Uploaded images are validated (type and size) and stored in Vercel Blob under random names.
+- Database migrations are applied automatically on Vercel by the `vercel-build` script.
 
 ## Getting Started
 

@@ -5,9 +5,10 @@ import { ReactNode, FC } from 'react';
 import clsx from 'clsx';
 import NextThemeProvider from '@/providers/next-theme-provider';
 import Header from '@/components/header';
+import Footer from '@/components/footer';
 
-// Inicializace fontu Inter
-const inter = Inter({ subsets: ['latin', 'latin-ext'] });
+// Inicializace fontu Inter, zpřístupněného jako CSS proměnná pro Tailwind (font-sans)
+const inter = Inter({ subsets: ['latin', 'latin-ext'], variable: '--font-inter' });
 
 // Metadata pro aplikaci, titulky podstránek se doplňují podle šablony
 export const metadata: Metadata = {
@@ -29,14 +30,12 @@ interface RootLayoutProps {
 const RootLayout: FC<RootLayoutProps> = ({ children }) => {
   return (
     // suppressHydrationWarning je nutný, protože next-themes nastavuje třídu na <html> před hydratací
-    <html lang="en" suppressHydrationWarning>
-      <body className={clsx(inter.className, 'bg-white antialiased dark:bg-black')}>
-        {/* Poskytovatel témat */}
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <body className={clsx('flex min-h-screen flex-col font-sans antialiased')}>
         <NextThemeProvider>
-          {/* Komponenta Header */}
           <Header />
-          {/* Obsah stránky */}
-          <main>{children}</main>
+          <main className="flex-1">{children}</main>
+          <Footer />
         </NextThemeProvider>
       </body>
     </html>

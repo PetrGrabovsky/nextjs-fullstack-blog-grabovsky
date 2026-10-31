@@ -1,19 +1,20 @@
 import { FC } from 'react';
-import clsx from 'clsx';
 import Image from 'next/image';
 import Link from 'next/link';
+import { HiArrowLeft } from 'react-icons/hi';
 import { BlogWithComments } from '@/utils/types';
+import { formatDate, getCategoryLabel } from '@/utils/helpers';
 import {
   buttonClasses,
   categoryBadgeClasses,
-  headingH2Classes,
-  paragraphClasses,
+  mutedTextClasses,
+  sectionTitleClasses,
 } from '@/utils/styles';
-import { formatDate, getCategoryLabel } from '@/utils/helpers';
 import Avatar from './avatar';
 import CommentForm from './comment-form';
 import DeleteCommentButton from './delete-comment-button';
 import DeletePostButton from './delete-post-button';
+import PostMeta from './post-meta';
 
 /**
  * Typový interface pro props komponenty BlogDetailsHome.
@@ -26,97 +27,99 @@ interface BlogDetailsHomeProps {
 
 /**
  * Komponenta BlogDetailsHome.
- * Tato komponenta zobrazuje detailní informace o konkrétním blogovém příspěvku,
- * včetně titulku, obrázku, popisu, autora a kategorie.
- * Umožňuje také přidání komentáře k příspěvku a zobrazení diskuze pod příspěvkem.
+ * Zobrazuje celý blogový příspěvek (titulek, autora, obrázek, obsah) a diskuzi pod ním.
  */
 const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData, currentUserId }) => {
   const isPostAuthor = blogData.authorId === currentUserId;
 
   return (
-    <section className="pt-[150px] pb-[120px]">
-      <div className="container">
-        <div className="mx-auto flex flex-col gap-4 lg:w-8/12">
-          <article>
-            {/* Zobrazení nadpisu příspěvku */}
-            <h1 className={headingH2Classes}>{blogData.title}</h1>
-            <div
-              className={clsx(
-                'mb-10 flex flex-wrap items-center justify-between gap-4 border-b',
-                'border-body-color/10 pb-4 dark:border-white/10'
-              )}
-            >
-              {/* Sekce s informacemi o autorovi příspěvku */}
-              <div className="flex items-center gap-4">
-                <Avatar name={blogData.authorName} image={blogData.authorImage} />
-                <div>
-                  <p className="text-base font-medium text-body-color">
-                    By <span className="text-dark dark:text-white">{blogData.authorName}</span>
-                  </p>
-                  <time
-                    dateTime={blogData.createdAt.toISOString()}
-                    className="text-sm text-body-color"
-                  >
-                    {formatDate(blogData.createdAt)}
-                  </time>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                {/* Odkaz na kategorii blogového příspěvku */}
-                <Link href={`/category/${blogData.category}`} className={categoryBadgeClasses}>
-                  {getCategoryLabel(blogData.category)}
-                </Link>
-                {/* Smazání příspěvku pouze pro autora */}
-                {isPostAuthor && <DeletePostButton postId={blogData.id} redirectTo="/blogs" />}
-              </div>
+    <div className="container py-12 sm:py-16">
+      <article className="mx-auto max-w-3xl">
+        <Link
+          href="/blogs"
+          className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-zinc-500 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+        >
+          <HiArrowLeft aria-hidden />
+          All posts
+        </Link>
+        {/* Kategorie a datum */}
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <Link href={`/category/${blogData.category}`} className={categoryBadgeClasses}>
+            {getCategoryLabel(blogData.category)}
+          </Link>
+          <PostMeta createdAt={blogData.createdAt} text={blogData.description} />
+        </div>
+        <h1 className="text-3xl font-extrabold tracking-tight text-balance text-zinc-900 sm:text-5xl dark:text-white">
+          {blogData.title}
+        </h1>
+        {/* Autor příspěvku a smazání pro autora */}
+        <div className="mt-8 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Avatar name={blogData.authorName} image={blogData.authorImage} />
+            <div>
+              <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+                {blogData.authorName}
+              </p>
+              <p className={mutedTextClasses}>Author</p>
             </div>
-            {/* Obrázek příspěvku */}
-            <div className="relative mb-10 aspect-[97/60] w-full overflow-hidden rounded sm:aspect-[97/44]">
-              <Image
-                src={blogData.image}
-                alt={blogData.title}
-                fill
-                priority
-                sizes="(min-width: 992px) 66vw, 100vw"
-                className="object-cover object-center"
-              />
-            </div>
-            {/* Zobrazení popisu (obsahu) příspěvku */}
-            <p className={paragraphClasses}>{blogData.description}</p>
-          </article>
-          {/* Sekce pro zobrazení diskuze pod příspěvkem */}
-          <section className="w-full py-8 lg:py-16">
-            <h2 className="mb-6 text-lg font-bold text-black lg:text-2xl dark:text-white">
-              Discussion ({blogData.comments.length})
-            </h2>
-            {/* Formulář pro přidání komentáře, nebo výzva k přihlášení */}
+          </div>
+          {isPostAuthor && <DeletePostButton postId={blogData.id} redirectToList />}
+        </div>
+        {/* Obrázek příspěvku */}
+        <div className="relative mt-10 aspect-video overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800">
+          <Image
+            src={blogData.image}
+            alt=""
+            fill
+            priority
+            sizes="(min-width: 768px) 768px, 100vw"
+            className="object-cover"
+          />
+        </div>
+        {/* Obsah příspěvku, zalomení řádků z textu zůstává zachováno */}
+        <div className="mt-10 text-lg leading-8 whitespace-pre-line text-zinc-700 dark:text-zinc-300">
+          {blogData.description}
+        </div>
+
+        {/* Diskuze pod příspěvkem */}
+        <section
+          aria-labelledby="discussion-heading"
+          className="mt-16 border-t border-zinc-200 pt-10 dark:border-zinc-800"
+        >
+          <h2 id="discussion-heading" className={sectionTitleClasses}>
+            Discussion ({blogData.comments.length})
+          </h2>
+          {/* Formulář pro přidání komentáře, nebo výzva k přihlášení */}
+          <div className="mt-6">
             {currentUserId ? (
               <CommentForm postId={blogData.id} />
             ) : (
-              <div className="flex flex-wrap items-center gap-4">
-                <p className="text-body-color">Log in to join the discussion.</p>
-                <Link href="/login" className={buttonClasses}>
+              <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-zinc-50 p-6 dark:bg-zinc-900">
+                <p className="text-zinc-600 dark:text-zinc-400">Log in to join the discussion.</p>
+                <Link href={`/login?callbackUrl=/blogs/${blogData.id}`} className={buttonClasses}>
                   Login
                 </Link>
               </div>
             )}
-            {/* Seznam komentářů */}
-            <ul className="mt-6">
-              {blogData.comments.map((comment) => (
-                <li
-                  key={comment.id}
-                  className="border-b border-body-color/10 py-6 text-base dark:border-white/10"
-                >
-                  <div className="mb-2 flex items-center justify-between gap-4">
-                    {/* Jméno autora komentáře, autor příspěvku je označen (Author) */}
-                    <p className="text-sm font-semibold text-black dark:text-white">
-                      {comment.authorName}
+          </div>
+          {/* Seznam komentářů */}
+          <ul className="mt-8 space-y-6">
+            {blogData.comments.map((comment) => (
+              <li key={comment.id} className="flex gap-4">
+                <Avatar name={comment.authorName} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-sm">
+                      <span className="font-semibold text-zinc-900 dark:text-white">
+                        {comment.authorName}
+                      </span>
+                      {/* Autor příspěvku je u svých komentářů označen */}
                       {comment.authorId === blogData.authorId && (
-                        <span className="ml-2 font-normal text-primary">(Author)</span>
+                        <span className={`${categoryBadgeClasses} ml-2`}>Author</span>
                       )}
                       <time
                         dateTime={comment.createdAt.toISOString()}
-                        className="ml-3 font-normal text-body-color"
+                        className="ml-2 text-zinc-500 dark:text-zinc-400"
                       >
                         {formatDate(comment.createdAt)}
                       </time>
@@ -126,14 +129,16 @@ const BlogDetailsHome: FC<BlogDetailsHomeProps> = ({ blogData, currentUserId }) 
                       <DeleteCommentButton commentId={comment.id} />
                     )}
                   </div>
-                  <p className="whitespace-pre-line text-body-color">{comment.text}</p>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
-      </div>
-    </section>
+                  <p className="mt-1 whitespace-pre-line text-zinc-700 dark:text-zinc-300">
+                    {comment.text}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </article>
+    </div>
   );
 };
 

@@ -15,3 +15,7 @@ export const getCategoryLabel = (value: string) =>
 // Formátování data pro zobrazení u příspěvků a komentářů
 export const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(date);
+
+// Odhad doby čtení textu v minutách (průměrně 200 slov za minutu)
+export const getReadingTime = (text: string) =>
+  Math.max(1, Math.round(text.trim().split(/\s+/).length / 200));

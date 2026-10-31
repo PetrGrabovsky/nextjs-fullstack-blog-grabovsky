@@ -2,8 +2,8 @@
 
 import { FC } from 'react';
 import { useTheme } from 'next-themes';
-import { MdDarkMode } from 'react-icons/md';
-import { BsSunFill } from 'react-icons/bs';
+import { HiMoon, HiSun } from 'react-icons/hi';
+import { iconButtonClasses } from '@/utils/styles';
 
 // Komponenta ThemeToggler pro přepínání mezi světlým a tmavým režimem
 const ThemeToggler: FC = () => {
@@ -15,11 +15,11 @@ const ThemeToggler: FC = () => {
       type="button"
       aria-label="Toggle dark mode"
       onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-      className="text-black dark:text-white"
+      className={iconButtonClasses}
     >
       {/* Ikona slunce v tmavém režimu a měsíce ve světlém režimu */}
-      <BsSunFill size={30} className="hidden dark:block" />
-      <MdDarkMode size={30} className="dark:hidden" />
+      <HiSun size={20} className="hidden dark:block" />
+      <HiMoon size={20} className="dark:hidden" />
     </button>
   );
 };

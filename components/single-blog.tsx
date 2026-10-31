@@ -1,70 +1,69 @@
 import { FC } from 'react';
-import clsx from 'clsx';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Blog } from '@/utils/types';
 import { categoryBadgeClasses } from '@/utils/styles';
-import { formatDate, getCategoryLabel } from '@/utils/helpers';
+import { getCategoryLabel, truncateDescription } from '@/utils/helpers';
 import Avatar from './avatar';
 import DeletePostButton from './delete-post-button';
+import PostMeta from './post-meta';
 
 // Interface definující props komponenty SingleBlog
 interface SingleBlogProps {
   blogItem: Blog; // Objekt reprezentující jednotlivý blogový příspěvek
   canDelete: boolean; // Příznak, zda je přihlášený uživatel autorem příspěvku
+  priority?: boolean; // Přednostní načtení obrázku (karty viditelné hned po načtení stránky)
 }
 
 /**
  * Komponenta SingleBlog.
- * Tato komponenta zobrazuje jeden blogový příspěvek včetně jeho obrázku, titulku, popisu
- * a dalších relevantních informací. Pokud je přihlášený uživatel autorem příspěvku,
- * zobrazí se také ikona pro odstranění příspěvku.
+ * Karta blogového příspěvku s obrázkem, kategorií, titulkem, úryvkem textu a autorem.
+ * Celá karta je klikatelná (odkaz přes titulek roztažený na celou kartu), tlačítko pro
+ * smazání se zobrazuje pouze autorovi příspěvku.
  */
-const SingleBlog: FC<SingleBlogProps> = ({ blogItem, canDelete }) => {
+const SingleBlog: FC<SingleBlogProps> = ({ blogItem, canDelete, priority = false }) => {
   const { id, image, category, title, description, authorName, authorImage, createdAt } = blogItem;
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-md bg-white shadow-one dark:bg-dark">
-      {/* Odkaz na detail příspěvku s obrázkem a štítkem kategorie */}
-      <Link href={`/blogs/${id}`} className="relative block aspect-[37/22] w-full">
-        <span className={clsx(categoryBadgeClasses, 'absolute top-6 right-6 z-20')}>
-          {getCategoryLabel(category)}
-        </span>
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-900/50 dark:hover:shadow-black/30">
+      {/* Obrázek příspěvku s jemným přiblížením při najetí myší */}
+      <div className="relative aspect-video overflow-hidden bg-zinc-100 dark:bg-zinc-800">
         <Image
           src={image}
-          alt={title}
+          alt=""
           fill
-          sizes="(min-width: 768px) 33vw, (min-width: 575px) 50vw, 100vw"
-          className="object-cover"
+          priority={priority}
+          sizes="(min-width: 1024px) 384px, (min-width: 640px) 50vw, 100vw"
+          className="object-cover transition duration-500 group-hover:scale-105"
         />
-      </Link>
-      {/* Kontejner pro textové informace blogového příspěvku */}
-      <div className="flex flex-1 flex-col p-6 sm:p-8 md:px-6 md:py-8 lg:p-8 xl:px-5 xl:py-8 2xl:p-8">
-        <h3>
+      </div>
+      <div className="flex flex-1 flex-col p-6">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <span className={categoryBadgeClasses}>{getCategoryLabel(category)}</span>
+          <PostMeta createdAt={createdAt} text={description} />
+        </div>
+        <h2 className="text-lg leading-snug font-semibold text-zinc-900 dark:text-white">
+          {/* Pseudo-element roztáhne odkaz přes celou kartu */}
           <Link
             href={`/blogs/${id}`}
-            className={clsx(
-              'mb-4 block truncate text-xl font-bold text-black hover:text-primary sm:text-2xl',
-              'dark:text-white dark:hover:text-primary'
-            )}
+            className="line-clamp-2 transition group-hover:text-primary-600 after:absolute after:inset-0 dark:group-hover:text-primary-400"
           >
             {title}
           </Link>
-        </h3>
-        {/* Zkrácený popis příspěvku na maximálně 2 řádky */}
-        <p className="mb-6 line-clamp-2 text-base font-medium text-body-color">{description}</p>
-        {/* Informace o autorovi a tlačítko pro smazání */}
-        <div className="mt-auto flex items-center justify-between border-t border-body-color/10 pt-6 dark:border-white/10">
-          <div className="flex items-center gap-4">
-            <Avatar name={authorName} image={authorImage} />
-            <div>
-              <p className="text-sm font-medium text-dark dark:text-white">By {authorName}</p>
-              <time dateTime={createdAt.toISOString()} className="text-xs text-body-color">
-                {formatDate(createdAt)}
-              </time>
-            </div>
+        </h2>
+        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+          {truncateDescription(description, 300)}
+        </p>
+        {/* Autor příspěvku a tlačítko pro smazání */}
+        <div className="mt-auto flex items-center justify-between gap-3 pt-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <Avatar name={authorName} image={authorImage} size="sm" />
+            <span className="truncate text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              {authorName}
+            </span>
           </div>
-          {canDelete && <DeletePostButton postId={id} />}
+          {/* Tlačítko leží nad roztaženým odkazem, aby šlo kliknout */}
+          {canDelete && <DeletePostButton postId={id} className="relative z-10" />}
         </div>
       </div>
     </article>
