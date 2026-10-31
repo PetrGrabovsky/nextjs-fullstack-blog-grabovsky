@@ -1,3 +1,42 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/* Tmavý režim se přepíná třídou .dark na elementu <html> (next-themes) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Vlastní design tokeny aplikace (dříve tailwind.config.ts) */
+@theme {
+  /* Breakpointy pro responzivní design */
+  --breakpoint-xs: 450px;
+  --breakpoint-sm: 575px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-2xl: 1400px;
+
+  /* Vlastní barvy */
+  --color-white: #ffffff;
+  --color-black: #090e34;
+  --color-dark: #1d2144;
+  --color-primary: #4a6cf7;
+  --color-yellow: #fbb040;
+  --color-body-color: #959cb1;
+
+  /* Vlastní stíny */
+  --shadow-signup: 0px 5px 10px rgba(4, 10, 34, 0.2);
+  --shadow-one: 0px 2px 3px rgba(7, 7, 77, 0.05);
+  --shadow-sticky: inset 0 -1px 0 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Centrovaný kontejner s vnitřním odsazením */
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+/* Tlačítka a odkazy mají v Tailwind 4 výchozí kurzor, vrácení ukazatele myši */
+@layer base {
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
