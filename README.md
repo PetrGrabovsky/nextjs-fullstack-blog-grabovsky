@@ -80,3 +80,7 @@ Requirements: Node.js 24 and a PostgreSQL database.
 | `npm run start`     | Run the production build      |
 | `npm run lint`      | Run ESLint                    |
 | `npm run typecheck` | Run the TypeScript type check |
+
+## Author
+
+Petr Grabovský · [LinkedIn](https://www.linkedin.com/in/petr-grabovsky) · [GitHub](https://github.com/PetrGrabovsky)
